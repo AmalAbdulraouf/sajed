@@ -1,0 +1,19 @@
+body{
+    padding:0px;
+}
+
+#deliver_to_customer{
+    display:none;
+}
+
+#perform_reoair_action{
+    display:none;
+}
+
+.logout_div_item{
+    display:none;
+}
+
+.main_screen{
+    width:100%;
+}

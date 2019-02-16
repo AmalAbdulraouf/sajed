@@ -1,0 +1,117 @@
+/* The side navigation menu */
+.sidenavW {
+    background-color: #337ab7 !important;
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Stay on top */
+    top: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 2px 0 8px -1px #888;
+    overflow-y: hidden;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+
+/* The navigation menu links */
+.sidenavW a {
+    padding-left: 15px;
+    padding-right: 9px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    /* padding: 8px 8px 8px 32px;*/
+    text-decoration: none;
+    font-size: 17px;
+    color: white;
+    display: block;
+    transition: 0.3s
+}
+#error {
+    color: white
+}
+/* When you mouse over the navigation links, change their color */
+.sidenavW a:hover, .sidenavW a:focus,.offcanvas a:focus{
+    color: #393939;
+    background-color: #e4e6e9;
+    text-decoration: none;
+
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenavW a:hover, .offcanvas a:active{
+    background-color: #e4e6e9;
+}
+
+/* Position and style the close button (top right corner) */
+.sidenavW .closebtn {
+
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#main {
+    transition: margin-left .5s;
+    padding: 20px;
+}
+/*.sidenav {padding-top: 15px;}*/
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+    /*.sidenav {padding-top: 15px;}*/
+    .sidenavW a {
+        font-size: 18px;
+    }
+    .sidenavW a:active {
+        background-color: cadetblue;
+    }
+}
+
+.closebtn {
+    border: none !important;
+    background: none !important;
+}
+
+#incoming_header {
+    color: white;
+    text-align: center;
+    margin-top: 0px;
+}
+
+#pending_bookings_list {
+    background-color: #ededed;
+    margin-top: 5px;
+    padding-top: 15px;
+    height: 100%;
+    overflow-y: auto;
+    min-height: 100%;
+}
+
+.item {
+    position:relative;
+    padding-top: 2px;
+    margin-right: 6px;
+    display:inline-block;
+    float: right
+}
+.badge{
+    z-index:2;
+    position: absolute;
+    right: -10px;
+    top: -3px;
+    background: #fb0007 !important;
+    text-align: center;
+    /*border-radius: 30px 30px 30px 30px;*/
+    color: white;
+    /*padding: 5px 5px;*/
+    /* font-size: 20px; */
+}
+
+.close_pending {
+    color: white;
+    opacity: 10;
+    float: left;
+    font-size: 24px;
+    margin-left: 10px;
+    background: none;
+}

@@ -1,0 +1,86 @@
+body{
+    margin-top : 57px;
+    padding:0px;
+
+}
+
+* {
+    box-sizing: border-box;
+    font-family: tahoma;
+    font-size: 12px;
+}
+
+h4
+{
+    display: inline
+}
+
+#forPrintShow
+{
+    display: none
+}
+
+#edit_order
+{
+    display: none
+}
+
+#cancel, #send
+{
+    display: none
+}
+
+#barcode2
+{
+    display: block
+}
+
+#sticker
+{
+    font-size: 8px !important;
+
+}
+
+#deliver_to_customer{
+    display:none;
+}
+
+#perform_reoair_action{
+    display:none;
+}
+.app-title{
+    display:none;
+}
+
+.logout_div_item{
+    display:none;
+}
+
+.main_screen{
+    font-family:"Comic Sans MS";
+    width:100%;
+    font-size: 6%;
+}
+
+.header_column_print {
+    visibility:  visible;
+    position: static;
+}
+
+.header_column {
+    visibility: hidden;
+    position: absolute;
+}
+
+div#voucher_footer {
+
+    display:inline;
+    direction : rtl;
+    float: right;
+    clear: both;
+}
+
+.address_row{
+    display:none;
+    height : 0px;
+}

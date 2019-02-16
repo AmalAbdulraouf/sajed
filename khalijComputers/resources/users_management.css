@@ -1,0 +1,25 @@
+div#leftcolumn {
+    width: 170px;
+    float: left;
+    margin-right: 4px;
+    margin-left: 10px;
+    background: slategrey;
+}
+
+div#topcolumn {
+    width: 100%;
+    float: top;
+    margin-right: 4px;
+    margin-left: 10px;
+}
+
+div#maincolumn {
+    float: left;
+    background: white;
+    width: 70%;
+    height : 500px
+}
+
+td.label {
+    width: 15%;
+}

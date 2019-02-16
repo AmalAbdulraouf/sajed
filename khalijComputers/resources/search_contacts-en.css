@@ -1,0 +1,30 @@
+
+#display
+{
+    width:250px;
+    max-height: 200px;
+    display:none;
+    float:left; 
+    margin-left: 0px;
+    border-left:solid 1px #dedede;
+    border-right:solid 1px #dedede;
+    border-bottom:solid 1px #dedede;
+    overflow:hidden;
+    overflow-y: scroll
+        ;
+}
+.display_box
+{
+    padding:4px; border-top:solid 1px #dedede; font-size:12px; 
+    height:40px;
+}
+
+.display_box:hover
+{
+    background:#3498DB;
+    color:#FFFFFF;
+}
+#shade
+{
+    background-color:#00CCFF;
+}

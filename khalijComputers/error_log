@@ -1,0 +1,4 @@
+[17-Sep-2014 07:02:37] PHP Parse error:  syntax error, unexpected ')' in /home/careers/public_html/sajed/codeigniter/application/controllers/main.php on line 14
+[17-Sep-2014 07:03:47] PHP Fatal error:  require_once() [<a href='function.require'>function.require</a>]: Failed opening required '/home/careers/public_html/sajed/codeigniter/system/database/drivers/careers_taher/careers_taher_driver.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/careers/public_html/sajed/codeigniter/system/database/DB.php on line 140
+[17-Sep-2014 07:42:54] PHP Parse error:  syntax error, unexpected T_LOGICAL_AND in /home/careers/public_html/sajed/codeigniter/application/views/view_view_order.php on line 385
+[17-Sep-2014 07:44:36] PHP Parse error:  syntax error, unexpected '{' in /home/careers/public_html/sajed/codeigniter/application/views/view_view_order.php on line 385

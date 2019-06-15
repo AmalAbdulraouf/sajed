@@ -38,6 +38,7 @@
                 <tbody>
                     <?php
                     foreach ($orders as $order) {
+//                        var_dump($order);die();
                         $services = array();
                         if ($order->software != 0)
                             $services[] = "software";
@@ -55,7 +56,7 @@
                         '<td>' . $order->contact_name . '</td>' .
                                 '<td>' . $order->phone . '</td>' .
                         '<td>' . $order->total . '</td>' .
-                        '<td><a href="#" onclick="sms_modal('.$order->order_id.')"><img width="35px" src="' . base_url() . 'resources/images/mail.png' . '"/></a></td>' .
+                        '<td><a href="#" onclick="sms_modal('.$order->customer_id.')"><img width="35px" src="' . base_url() . 'resources/images/mail.png' . '"/></a></td>' .
                         '</tr>';
                     }
                     ?>
@@ -104,15 +105,32 @@
         },
     });
 
-    function sms_modal(order_id){
-        var msg = window.prompt();
+    function sms_modal(customer_id){
+        var msg = window.prompt('ادخل نص الرسالة  Please enter the sms text');
         if(msg != null) {
             if(msg != ''){
-                
+                $.ajax({
+                        type: "POST",
+                        url: site_url + "/contacts/send_ntf_to_customer",
+                        dataType: "json",
+                        data: {
+                            "msg": msg,
+                            "contact_id": customer_id
+                        },
+                        success: function(data) {
+                            $('textarea[name=new_sms]').val("");
+                            $('textarea[name=new_sms]').text("");
+                            $('.error').html("");
+                            $('#new_sms').modal("hide");
+                        },
+                        error: function(response) {
+                        }
+                    });
             } else {
-                alert('');
+                console.log('empty');
             }
-        }
+        } else
+            console.log('cancel');
         
     }
 </script>

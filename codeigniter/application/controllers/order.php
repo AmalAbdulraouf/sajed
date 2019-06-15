@@ -23,7 +23,7 @@ class Order extends CI_Controller {
     public function call_center_view(){
         $date = date('Y-m-d');
         $this->load->model('model_reports');
-        $orders = $this->model_reports->get_delivered_report('2019-01-01load_message_page',$date,"","orders.id","");
+        $orders = $this->model_reports->ready_not_delivered($date,$date,"","orders.id","");
         $data = array(
             'orders' => $orders
         );

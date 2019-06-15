@@ -407,7 +407,7 @@ FROM
 
     public function ready_not_delivered($start_date, $end_date, $sWhere, $sOrder, $sLimit) {
         $this->db->_protect_identifiers = false;
-        $this->db->select('orders.software,orders.electronic,orders.external_repair,orders.id as order_id, orders.fault_description, '
+        $this->db->select('orders.software,orders.electronic,orders.customer_id,orders.external_repair,orders.id as order_id, orders.fault_description, '
                 . 'TIMESTAMPDIFF(DAY,actions.date,CURRENT_TIMESTAMP) as date ,orders.repair_cost,'
                 . 'actions.description as place,orders.spare_parts_cost,'
                 . 'concat(contacts.first_name," ", contacts.last_name) as contact_name,contacts.phone,'

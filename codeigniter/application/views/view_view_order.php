@@ -4,7 +4,8 @@
 <script src='<?php echo base_url() . 'resources/js/view_order.js' ?>'></script>
 <link rel="stylesheet" type="text/css" href='<?php echo base_url(); ?>resources/datatables.min.css'/>
 <script type="text/javascript" src='<?php echo base_url(); ?>resources/datatables.min.js'></script>
-<link rel="stylesheet" type="text/css" href='<?php // echo base_url() . 'resources/search_contacts.css'                                               ?>'>
+<script type="text/javascript" src='<?php echo base_url(); ?>resources/bs-custom-file-input.min.js'></script>
+<link rel="stylesheet" type="text/css" href='<?php // echo base_url() . 'resources/search_contacts.css'                                                   ?>'>
 <link rel="stylesheet" type="text/css" href='<?php echo base_url() . 'resources/jquery-ui.css' ?>'>
 <link rel="stylesheet" type="text/css" href='<?php echo base_url() . 'resources/print_style.css' ?>' media="print">
 <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>assets/bootstrap-datetimepicker.min.css" /> 
@@ -564,722 +565,764 @@
     }
 
 </script>
-<div class="panel panel-default" id="containerforhide">
-    <div class="panel-heading clearfix" style="text-align: center" >
-        <?php $user_permissions = $this->session->userdata('user_permissions'); ?>
-        <div class="row">
-            <div id="edit_order" class="col-md-4 btn-group pull-left main_menu_item">
-                <?php if (permission_included($user_permissions, 'Modify an order')) { ?>
-                    <button onclick = "location.href = '<?php echo base_url() ?>index.php/order/edit_order_page/<?php echo $order_info['order_basic_info'][0]->id ?>';"
-                            class="btn btn-success btn-sm">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-                        <?php echo lang('change') ?>
-                    </button>
-                    <button id="deletion"
-                            class="btn btn-danger btn-sm">
-                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                        <?php echo lang('delete') ?>
-                    </button>
-                    <?php
-                }
-                $id = $order_info['order_basic_info'][0]->id;
-                ?>
-                <button onclick="print_paper();"
-                        class="btn btn-info btn-sm">
-                    <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-                    <?php echo lang('print') ?>
+<?php
+if ($order_info['order_basic_info'][0]->canceled == 1) {
+    echo '<div class="panel panel-danger" id="containerforhide">';
+} else {
+    echo '<div class="panel panel-default" id="containerforhide">';
+}
+?>
+
+<div class="panel-heading clearfix" style="text-align: center" >
+            <?php $user_permissions = $this->session->userdata('user_permissions'); ?>
+    <div class="row">
+        <div id="edit_order" class="col-md-4 btn-group pull-left main_menu_item">
+<?php if (permission_included($user_permissions, 'Modify an order')) { ?>
+                <button onclick = "location.href = '<?php echo base_url() ?>index.php/order/edit_order_page/<?php echo $order_info['order_basic_info'][0]->id ?>';"
+                        class="btn btn-success btn-sm">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+    <?php echo lang('change') ?>
                 </button>
-                <!--                <button onclick="print_sticker();"
-                                        class="btn btn-default btn-sm">
-                                    <span class="glyphicon glyphicon-tag" aria-hidden="true"></span>
-                <?php echo lang('print_sticker') ?>
-                                </button>-->
-            </div>
-            <div class="col-md-4">
-                <h2 style="display: inline">
-                    <?php echo lang('order'); ?> #<?php echo $order_info['order_basic_info'][0]->id ?>
-                    <?php
-                    if ($just_received != 1) {
-                        echo "<h3 style='margin-top:5px; margin-bottom: 5px'>" . lang($order_info['current_status']->name) . "</h3>";
-                    }
-                    if ($order_info['order_basic_info'][0]->distructed == 1)
-                        echo "<h4 style='margin-top:5px; margin-bottom: 5px;color:#a94442;'>" . lang('distructed') . "</h4>";
-                    ?>
-                </h2>
-            </div>
+                <button id="deletion"
+                        class="btn btn-danger btn-sm">
+                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                <?php echo lang('delete') ?>
+                </button>
+                <?php
+            }
+            $id = $order_info['order_basic_info'][0]->id;
+            ?>
+            <button onclick="print_paper();"
+                    class="btn btn-info btn-sm">
+                <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+<?php echo lang('print') ?>
+            </button>
+            <!--                <button onclick="print_sticker();"
+                                    class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-tag" aria-hidden="true"></span>
+<?php echo lang('print_sticker') ?>
+                            </button>-->
+        </div>
+        <div class="col-md-4">
+            <h2 style="display: inline">
+                <?php echo lang('order'); ?> #<?php echo $order_info['order_basic_info'][0]->id ?>
+                <?php
+                if ($just_received != 1) {
+                    echo "<h3 style='margin-top:5px; margin-bottom: 5px'>" . lang($order_info['current_status']->name) . "</h3>";
+                }
+                if ($order_info['order_basic_info'][0]->distructed == 1)
+                    echo "<h4 style='margin-top:5px; margin-bottom: 5px;color:#a94442;'>" . lang('distructed') . "</h4>";
+                if ($order_info['order_basic_info'][0]->canceled == 1) {
+                    echo '<br><h4>الطلب ملغي</h4>';
+                }
+                ?>
+            </h2>
         </div>
     </div>
-    <div class="panel-body"  >
-        <script>
-            $(document).ready(function () {
-                var msg = <?php echo json_encode(lang("confirm_delete_msg")); ?>;
-                $('#deletion').click(function () {
-                    var conf = confirm(language.confirm_delete);
-                    if (conf == true)
-                    {
-                        var id = <?php echo json_encode($id); ?>;
-                        var b_url = "<?php echo base_url(); ?>";
-                        $.ajax({
-                            url: base_url + "index.php/order/delete_order/" + id,
-                            //type: "POST",
-                            error: function () {
-                            },
-                            success: function () {
-                                window.location.href = base_url + "/index.php/order/header";
-                            }
-                        });
-                    }
-                });
+</div>
+<div class="panel-body"  >
+    <script>
+        $(document).ready(function () {
+            var msg = <?php echo json_encode(lang("confirm_delete_msg")); ?>;
+            $('#deletion').click(function () {
+                var conf = confirm(language.confirm_delete);
+                if (conf == true)
+                {
+                    var id = <?php echo json_encode($id); ?>;
+                    var b_url = "<?php echo base_url(); ?>";
+                    $.ajax({
+                        url: base_url + "index.php/order/delete_order/" + id,
+                        //type: "POST",
+                        error: function () {
+                        },
+                        success: function () {
+                            window.location.href = base_url + "/index.php/order/header";
+                        }
+                    });
+                }
             });
-        </script>
+        });
+    </script>
 
-        <h2 align="center">
-            <?php
-            echo lang('customer_info') . "<br>";
+    <h2 align="center">
+        <?php
+        echo lang('customer_info') . "<br>";
 //            if ($order_info['order_basic_info'][0]->contact_rate != '0') {
-            if ($order_info['order_basic_info'][0]->contact_rate == '1') {
-                $class = "selected-face";
-            } else
-                $class = "face";
-            ?>
-            <img rate="1" class="<?php echo $class ?>" width="45px" height="40px" src="<?php echo base_url() ?>resources/images/sad.png" />
-            <?php
-            if ($order_info['order_basic_info'][0]->contact_rate == '2') {
-                $class = "selected-face";
-            } else
-                $class = "face";
-            ?>
-            <img  rate="2" class="<?php echo $class ?>" style="margin-top: -4px;" width="50px" height="43px" src="<?php echo base_url() ?>resources/images/normal.png" />
-            <?php
-            if ($order_info['order_basic_info'][0]->contact_rate == '3') {
-                $class = "selected-face";
-            } else
-                $class = "face";
-            ?>
-            <img   rate="3" class="<?php echo $class ?>" width="45px" height="40px" src="<?php echo base_url() ?>resources/images/happy.png" />
-            <?php
+        if ($order_info['order_basic_info'][0]->contact_rate == '1') {
+            $class = "selected-face";
+        } else
+            $class = "face";
+        ?>
+        <img rate="1" class="<?php echo $class ?>" width="45px" height="40px" src="<?php echo base_url() ?>resources/images/sad.png" />
+        <?php
+        if ($order_info['order_basic_info'][0]->contact_rate == '2') {
+            $class = "selected-face";
+        } else
+            $class = "face";
+        ?>
+        <img  rate="2" class="<?php echo $class ?>" style="margin-top: -4px;" width="50px" height="43px" src="<?php echo base_url() ?>resources/images/normal.png" />
+        <?php
+        if ($order_info['order_basic_info'][0]->contact_rate == '3') {
+            $class = "selected-face";
+        } else
+            $class = "face";
+        ?>
+        <img   rate="3" class="<?php echo $class ?>" width="45px" height="40px" src="<?php echo base_url() ?>resources/images/happy.png" />
+        <?php
 //            }
+        ?>
+    </h2>
+    <div class = "row cont-inf">
+        <?php if ($order_info['order_basic_info'][0]->company != "0") {
             ?>
-        </h2>
-        <div class = "row cont-inf">
-            <?php if ($order_info['order_basic_info'][0]->company != "0") {
-                ?>
                 <?php if ($order_info['order_basic_info'][0]->company_name != "") { ?>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('company_name'); ?></h4>
-                        <?php echo $order_info['order_basic_info'][0]->company_name;
-                        ?>
-                    </div>
-                <?php } ?>
-            <?php } ?>
-            <div class="col-md-3">
-                <h4><?php echo lang('customer_name'); ?></h4>
-                <?php echo $order_info['order_basic_info'][0]->contact_fname . " " . $order_info['order_basic_info'][0]->contact_lname; ?>
-            </div>
-            <div class="col-md-3">
-                <h4><?php echo lang('phone'); ?></h4>
-                <?php echo '966' . $order_info['order_basic_info'][0]->contact_phone;
-                ?>
-            </div>
-            <?php if ($order_info['order_basic_info'][0]->contact_address != '') {
-                ?>
                 <div class="col-md-3">
-                    <h4><?php echo lang('address'); ?></h4>
-                    <?php echo $order_info['order_basic_info'][0]->contact_address; ?>
-                </div>
-            <?php } ?>
-            <?php if ($order_info['order_basic_info'][0]->contact_email != '') {
+                    <h4><?php echo lang('company_name'); ?></h4>
+                <?php echo $order_info['order_basic_info'][0]->company_name;
                 ?>
-                <div class="col-md-3">
-                    <h4><?php echo lang('email'); ?></h4>
-                    <?php echo $order_info['order_basic_info'][0]->contact_email; ?>
                 </div>
+    <?php } ?>
             <?php } ?>
+        <div class="col-md-3">
+            <h4><?php echo lang('customer_name'); ?></h4>
+<?php echo $order_info['order_basic_info'][0]->contact_fname . " " . $order_info['order_basic_info'][0]->contact_lname; ?>
+        </div>
+        <div class="col-md-3">
+            <h4><?php echo lang('phone'); ?></h4>
+        <?php echo '966' . $order_info['order_basic_info'][0]->contact_phone;
+        ?>
+        </div>
+<?php if ($order_info['order_basic_info'][0]->contact_address != '') {
+    ?>
             <div class="col-md-3">
-                <h4><?php echo lang('customer_points'); ?></h4>
-                <?php echo $order_info['order_basic_info'][0]->customer_points ?>
+                <h4><?php echo lang('address'); ?></h4>
+            <?php echo $order_info['order_basic_info'][0]->contact_address; ?>
             </div>
+        <?php } ?>
+<?php if ($order_info['order_basic_info'][0]->contact_email != '') {
+    ?>
             <div class="col-md-3">
-                <h4><?php echo lang('customer_discount'); ?></h4>
-                <?php echo $order_info['order_basic_info'][0]->contact_discount . " %" ?>
+                <h4><?php echo lang('email'); ?></h4>
+            <?php echo $order_info['order_basic_info'][0]->contact_email; ?>
             </div>
+            <?php } ?>
+        <div class="col-md-3">
+            <h4><?php echo lang('customer_points'); ?></h4>
+<?php echo $order_info['order_basic_info'][0]->customer_points ?>
+        </div>
+        <div class="col-md-3">
+            <h4><?php echo lang('customer_discount'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->contact_discount . " %" ?>
+        </div>
             <?php if ($just_received == 1) { ?>
-                <div class="col">
-                    <h4><?php echo lang('date'); ?></h4>
-                    <?php echo $order_info['actions'][0]->date; ?>
+            <div class="col">
+                <h4><?php echo lang('date'); ?></h4>
+            <?php echo $order_info['actions'][0]->date; ?>
+            </div>
+<?php }
+?>
+    </div>
+    <div class="row cont-inf2">
+        <h2 align="center"><?php echo lang('machine_info'); ?></h2>
+        <div class="col-md-3">
+            <h4><?php echo lang('serial_no'); ?></h4>
+            <?php
+            echo $order_info['order_basic_info'][0]->serial_number;
+            ?>
+        </div>
+
+        <div class="col-md-3">
+            <h4><?php echo lang('model'); ?></h4>
+<?php echo $order_info['order_basic_info'][0]->model_name; ?>
+        </div>
+        <div class="col-md-3">
+            <h4><?php echo lang('brand'); ?></h4>
+<?php echo $order_info['order_basic_info'][0]->brand_name; ?>
+        </div>
+
+
+        <div class="col-md-3">
+            <h4><?php echo lang('machine_type'); ?></h4>
+<?php echo $order_info['order_basic_info'][0]->machine_type; ?>
+        </div>
+        <br><br><br><br>
+        <div class="col mach">
+            <div class="col-md-3">
+                <h4><?php echo lang('color'); ?></h4>
+<?php echo $order_info['order_basic_info'][0]->color_name; ?>
+            </div>
+            <!--                    <div class="col-md-3">
+                                    <h4><?php echo lang('under_waranty'); ?></h4>
+            <?php
+            if ($order_info['order_basic_info'][0]->under_warranty == 1) {
+                echo lang('YES') . "</div>";
+                ?>
+                                                                                                                                                                                                            
+    <?php if ($order_info['order_basic_info'][0]->billNumber != null) {
+        ?>
+                                                                                                                                                                                                                <div class="col">
+                                                                                                                                                                                                                <h4><?php echo lang('billNumber'); ?></h4>
+                    <?php echo $order_info['order_basic_info'][0]->billNumber; ?>
+                                                                                                                                                                                                                </div>
+                    <?php
+                }
+                if ($order_info['order_basic_info'][0]->billDate != null) {
+                    ?>
+                                                                                                                                                                                                                <div class="col">
+                                                                                                                                                                                                                <h4><?php echo lang('billDate'); ?></h4>
+                    <?php echo $order_info['order_basic_info'][0]->billDate; ?>
+                                                                                                                                                                                                                </div>
+                    <?php
+                }
+            } else {
+                echo lang('NO') . "</div>";
+            }
+            ?>
+                                </div>-->
+            <div class="col-md-3 pull-right">
+                <h4><?php echo lang('faults'); ?></h4>
+                <?php
+                if ($order_info['order_basic_info'][0]->faults != "") {
+                    echo $order_info['order_basic_info'][0]->faults . "</div>";
+                } else {
+                    echo lang('not_exist') . "</div>";
+                }
+                ?>
+<?php if ($order_info['order_basic_info'][0]->image != "") { ?>
+                    <div class="col-md-3 pull-right">
+                        <img width="200px" height="200px" src="<?php echo base_url() . "resources/machines/" . $order_info['order_basic_info'][0]->image ?>"/>
+                    </div>
+<?php } ?>
+            </div>
+
+        </div>
+
+        <div class="row cont-inf">
+
+            <div class="col cont-inf">
+
+                <h4><?php echo lang('service'); ?>:
+
+                </h4>  
+
+                <?php
+                if ($order_info['order_basic_info'][0]->software == 1)
+                    echo " <img width='30px' height='30px' src='" . base_url() . "resources/images/software.png'/> software برامج ";
+                if ($order_info['order_basic_info'][0]->new_software == 1)
+                    echo " <img width='30px' height='30px' src='" . base_url() . "resources/images/sw_pack.png'/> new device software برمجة جهاز جديد";
+                if ($order_info['order_basic_info'][0]->electronic == 1)
+                    echo "  <img width='30px' height='30px' src='" . base_url() . "resources/images/electronic.png'/> electronic الكترونيات  ";
+                if ($order_info['order_basic_info'][0]->external_repair == 1)
+                    echo "  <img width='30px' height='30px' src='" . base_url() . "resources/images/external.png'/> external صيانة خارجية  ";
+                if ($order_info['order_basic_info'][0]->under_warranty == 1)
+                    echo "  <img width='30px' height='30px' src='" . base_url() . "resources/images/warranty.png'/> warranty ضمان";
+                ?>
+
+                <h4 align="">
+<?php echo lang('fault_description'); ?>
+            <?php echo $order_info['order_basic_info'][0]->fault_description; ?> 
+                </h4>
+            </div>
+            <?php
+            if ($order_info['current_status']->status_id == 5 || $order_info['current_status']->status_id == 6) {
+                if ($order_info['order_basic_info'][0]->under_warranty != 1) {
+                    if ($order_info['order_basic_info'][0]->spare_parts_cost + $order_info['order_basic_info'][0]->repair_cost == 0) {
+                        ?>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('examining_cost'); ?></h4>
+                        <?php echo $order_info['order_basic_info'][0]->examine_cost ?>
+                        </div>
+        <?php } else {
+            ?>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('repair_cost'); ?></h4>
+            <?php echo $order_info['order_basic_info'][0]->repair_cost ?>
+                        </div>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('spare_parts_cost'); ?></h4>
+            <?php echo $order_info['order_basic_info'][0]->spare_parts_cost ?>
+                        </div>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('total_cost'); ?></h4>
+                        <?php echo $order_info['order_basic_info'][0]->spare_parts_cost + $order_info['order_basic_info'][0]->repair_cost ?>
+                        </div>							
+                        <?php
+                        if ($order_info['order_basic_info'][0]->discount != 0) {
+                            echo '<div class="col-md-3"><h4>';
+                            echo lang('discount');
+                            echo ': ';
+                            echo $order_info['order_basic_info'][0]->discount . " ر.س";
+                            echo '</h4></div>';
+                        }
+                        if ($order_info['order_basic_info'][0]->company == 1) {
+                            if ($order_info['order_basic_info'][0]->company_discount != 0) {
+                                echo '<div class="col-md-3"><h4>';
+                                echo lang('company_discount');
+                                echo ': ';
+                                echo $order_info['order_basic_info'][0]->company_discount . "%";
+                                echo '</h4></div>';
+                            }
+                        } else if ($order_info['order_basic_info'][0]->company == 0) {
+                            if ($order_info['order_basic_info'][0]->contact_discount != 0) {
+                                echo '<div class="col-md-3"><h4>';
+                                echo lang('customer_discount');
+                                echo ': ';
+                                echo $order_info['order_basic_info'][0]->contact_discount . "%";
+                                echo '</h4></div>';
+                            }
+                        }
+                    }
+                }
+            }
+            if ($order_info['order_basic_info'][0]->external_repair == 1) {
+                if ($order_info['order_basic_info'][0]->status_id != 5 && $order_info['order_basic_info'][0]->status_id != 6 && $order_info['order_basic_info'][0]->status_id != 4) {
+                    ?>
+                    <div class = "col-md-3">
+                        <h4><?php echo lang('visite_date');
+                    ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->visite_date ?>
+                    </div>
+                    <div class="col-md-3">
+                        <h4><?php echo lang('visite_cost'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->visite_cost; ?>
+                    </div>
+                    <div class="col-md-3">
+                        <h4><?php echo lang('cost_estimation'); ?></h4>
+                    <?php echo $order_info['order_basic_info'][0]->estimated_cost; ?>	
+                    </div>
+                    <?php
+                }
+            }
+            if ($order_info['order_basic_info'][0]->under_warranty != 1) {
+                if ($order_info['order_basic_info'][0]->examine_date == 0 && $order_info['order_basic_info'][0]->status_id != 5 && $order_info['order_basic_info'][0]->status_id != 6 && $order_info['order_basic_info'][0]->status_id != 4) {
+                    ?>
+                    <div class="col-md-3">
+                        <h4><?php echo lang('total_cost'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->spare_parts_cost + $order_info['order_basic_info'][0]->repair_cost ?>
+                    </div>
+                    <div class="col-md-3">
+                        <h4><?php echo lang('delivery_date'); ?></h4>
+                    <?php echo lang('during') . " " . $order_info['order_basic_info'][0]->delivery_date . " " . lang('work_day'); ?>
+                    </div>
+        <?php if ($order_info['order_basic_info'][0]->under_warranty != 1) {
+            ?>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('cost_estimation'); ?></h4>
+                        <?php echo $order_info['order_basic_info'][0]->estimated_cost; ?>	
+                        </div>
+                        <?php
+                    }
+                } else if ($order_info['order_basic_info'][0]->delivery_date == 0 && $order_info['order_basic_info'][0]->status_id != 5 && $order_info['order_basic_info'][0]->status_id != 6 && $order_info['order_basic_info'][0]->status_id != 4) {
+                    ?>
+                    <div class="col-md-3">
+                        <h4><?php echo lang('examine_date'); ?></h4>
+                    <?php echo lang('during') . " " . $order_info['order_basic_info'][0]->examine_date . " " . lang('day'); ?>
+                    </div>
+        <?php if ($order_info['order_basic_info'][0]->under_warranty != 1) {
+            ?>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('examining_cost'); ?></h4>
+                        <?php echo $order_info['order_basic_info'][0]->examine_cost; ?>
+                        </div>
+                        <?php
+                    }
+                }
+            }
+            if ($order_info['order_basic_info'][0]->new_software == 1) {
+                ?>
+                <div class="col-md-3">
+                    <h4><?php echo lang('billNumber'); ?></h4>
+    <?php echo $order_info['order_basic_info'][0]->billNumber ?>
                 </div>
-            <?php }
+                <div class="col-md-3">
+                    <h4><?php echo lang('billDate'); ?></h4>
+                <?php echo $order_info['order_basic_info'][0]->billDate; ?>
+                </div>
+                <?php
+            }
+            if ($order_info['order_basic_info'][0]->under_warranty == 1) {
+                ?>
+                <div class="col-md-3">
+                    <h4><?php echo lang('billNumber'); ?></h4>
+    <?php echo $order_info['order_basic_info'][0]->billNumber ?>
+                </div>
+                <div class="col-md-3">
+                    <h4><?php echo lang('billDate'); ?></h4>
+    <?php echo $order_info['order_basic_info'][0]->billDate; ?>
+                </div>
+                <div class="col-md-3">
+                    <h4><?php echo lang('warranty_period'); ?></h4>
+    <?php echo $order_info['order_basic_info'][0]->warranty_period . " " . lang('year'); ?>	
+                </div>
+                <div class="col-md-3">
+                    <h4><?php echo lang('warranty_times'); ?></h4>
+                <?php echo ($order_info['order_basic_info'][0]->warranty_times != 0) ? $order_info['order_basic_info'][0]->warranty_times : lang('not_exist'); ?>	
+                </div>
+    <?php if ($order_info['order_basic_info'][0]->sent != 0) { ?>
+                    <div class="row">        
+                        <!--                            <div class="col-md-3">
+                                                        <h4><?php echo lang('received'); ?></h4>
+                                                    </div>-->
+                        <div class="col-md-3">
+                            <h4><?php echo lang('shipping_company'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->shipping_company ?>
+                        </div>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('bill_of_lading'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->bill_of_lading; ?>
+                        </div>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('agent_name'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->agent_name; ?>	
+                        </div>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('received_date'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->received_date; ?>	
+                        </div>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('arrived_receipt_number'); ?></h4>
+        <?php echo $order_info['order_basic_info'][0]->arrived_receipt_number ?>
+                        </div>
+                        <div class="col-md-3">
+                            <h4><?php echo lang('receipt_employee'); ?></h4>
+                    <?php echo $order_info['order_basic_info'][0]->receipt_employee_name; ?>
+                        </div>
+                    </div>
+                    <?php
+                }
+            }
+
+            if ($order_info['order_basic_info'][0]->external_repair != 0) {
+                ?>
+                <!--                        <div class="col-md-3">
+                                            <h4><?php echo lang('external_repair'); ?></h4>
+                                        </div>-->
+        <?php } ?>
+        </div>
+        <?php
+        if ($order_info['order_basic_info'][0]->temporary_device) {
+            $device = $order_info['order_basic_info'][0]->temporary_device;
+            ?>
+            <div class="row cont-inf2">   
+                <h4><?php echo lang('temporary_device_given') ?></h4>
+
+                <div class="col-md-3">
+                    <h4><?php echo lang('machine_type'); ?></h4>
+    <?php echo $device->machine_type ?>
+                </div>
+                <div class="col-md-3">
+                    <h4><?php echo lang('brand'); ?></h4>
+    <?php echo $device->brand; ?>
+                </div>
+                <div class="col-md-3">
+                    <h4><?php echo lang('model'); ?></h4>
+    <?php echo $device->model; ?>	
+                </div>
+                <div class="col-md-3">
+                    <h4><?php echo lang('color'); ?></h4>
+    <?php echo $device->color; ?>	
+                </div>
+                <div class="col-md-3">
+                    <h4><?php echo lang('serial_no'); ?></h4>
+                <?php echo $device->serial_number; ?>	
+                </div>
+                    <?php if ($device->faults != "") { ?>
+                    <div class="col-md-3">
+                        <h4><?php echo lang('faults'); ?></h4>
+                    <?php echo $device->faults; ?>	
+                    </div>
+    <?php } ?>
+                    <?php if ($device->accessories != "") { ?>
+                    <div class="col-md-3">
+                        <h4><?php echo lang('accessories'); ?></h4>
+                    <?php echo $device->accessories; ?>	
+                    </div>
+            <?php } ?>
+            </div>
+            <?php } ?>
+        <div class="row cont-inf2">
+            <?php
+            if ($order_info['accessories']->notes != "") {
+                echo '<h3>' . lang("accessories") . '</h3>';
+
+                echo '<td>' . $order_info['accessories']->notes . '</td>';
+            } else {
+                echo '<h3>' . lang("accessories") . '</h3>';
+
+                echo lang('not_exist');
+            }
             ?>
         </div>
         <div class="row cont-inf2">
-            <h2 align="center"><?php echo lang('machine_info'); ?></h2>
-            <div class="col-md-3">
-                <h4><?php echo lang('serial_no'); ?></h4>
-                <?php
-                echo $order_info['order_basic_info'][0]->serial_number;
-                ?>
-            </div>
-
-            <div class="col-md-3">
-                <h4><?php echo lang('model'); ?></h4>
-                <?php echo $order_info['order_basic_info'][0]->model_name; ?>
-            </div>
-            <div class="col-md-3">
-                <h4><?php echo lang('brand'); ?></h4>
-                <?php echo $order_info['order_basic_info'][0]->brand_name; ?>
-            </div>
-
-
-            <div class="col-md-3">
-                <h4><?php echo lang('machine_type'); ?></h4>
-                <?php echo $order_info['order_basic_info'][0]->machine_type; ?>
-            </div>
-            <br><br><br><br>
-            <div class="col mach">
-                <div class="col-md-3">
-                    <h4><?php echo lang('color'); ?></h4>
-                    <?php echo $order_info['order_basic_info'][0]->color_name; ?>
-                </div>
-                <!--                    <div class="col-md-3">
-                                        <h4><?php echo lang('under_waranty'); ?></h4>
-                <?php
-                if ($order_info['order_basic_info'][0]->under_warranty == 1) {
-                    echo lang('YES') . "</div>";
-                    ?>
-                                                                                                                                                                                                            
-                    <?php if ($order_info['order_basic_info'][0]->billNumber != null) {
-                        ?>
-                                                                                                                                                                                                                                                                                <div class="col">
-                                                                                                                                                                                                                                                                                <h4><?php echo lang('billNumber'); ?></h4>
-                        <?php echo $order_info['order_basic_info'][0]->billNumber; ?>
-                                                                                                                                                                                                                                                                                </div>
-                        <?php
-                    }
-                    if ($order_info['order_basic_info'][0]->billDate != null) {
-                        ?>
-                                                                                                                                                                                                                                                                                <div class="col">
-                                                                                                                                                                                                                                                                                <h4><?php echo lang('billDate'); ?></h4>
-                        <?php echo $order_info['order_basic_info'][0]->billDate; ?>
-                                                                                                                                                                                                                                                                                </div>
-                        <?php
-                    }
-                } else {
-                    echo lang('NO') . "</div>";
-                }
-                ?>
-                                    </div>-->
-                <div class="col-md-3 pull-right">
-                    <h4><?php echo lang('faults'); ?></h4>
-                    <?php
-                    if ($order_info['order_basic_info'][0]->faults != "") {
-                        echo $order_info['order_basic_info'][0]->faults . "</div>";
-                    } else {
-                        echo lang('not_exist') . "</div>";
-                    }
-                    ?>
-                    <?php if ($order_info['order_basic_info'][0]->image != "") { ?>
-                        <div class="col-md-3 pull-right">
-                            <img width="200px" height="200px" src="<?php echo base_url() . "resources/machines/" . $order_info['order_basic_info'][0]->image ?>"/>
-                        </div>
-                    <?php } ?>
-                </div>
-
-            </div>
-
-            <div class="row cont-inf">
-
-                <div class="col cont-inf">
-
-                    <h4><?php echo lang('service'); ?>:
-
-                    </h4>  
-
-                    <?php
-                    if ($order_info['order_basic_info'][0]->software == 1)
-                        echo " <img width='30px' height='30px' src='" . base_url() . "resources/images/software.png'/> software برامج ";
-                    if ($order_info['order_basic_info'][0]->electronic == 1)
-                        echo "  <img width='30px' height='30px' src='" . base_url() . "resources/images/electronic.png'/> electronic الكترونيات  ";
-                    if ($order_info['order_basic_info'][0]->external_repair == 1)
-                        echo "  <img width='30px' height='30px' src='" . base_url() . "resources/images/external.png'/> external صيانة خارجية  ";
-                    if ($order_info['order_basic_info'][0]->under_warranty == 1)
-                        echo "  <img width='30px' height='30px' src='" . base_url() . "resources/images/warranty.png'/> warranty ضمان";
-                    ?>
-
-                    <h4 align="">
-                        <?php echo lang('fault_description'); ?>
-                        <?php echo $order_info['order_basic_info'][0]->fault_description; ?> 
-                    </h4>
-                </div>
-                <?php
-                if ($order_info['current_status']->status_id == 5 || $order_info['current_status']->status_id == 6) {
-                    if ($order_info['order_basic_info'][0]->under_warranty != 1) {
-                        if ($order_info['order_basic_info'][0]->spare_parts_cost + $order_info['order_basic_info'][0]->repair_cost == 0) {
-                            ?>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('examining_cost'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->examine_cost ?>
-                            </div>
-                        <?php } else {
-                            ?>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('repair_cost'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->repair_cost ?>
-                            </div>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('spare_parts_cost'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->spare_parts_cost ?>
-                            </div>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('total_cost'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->spare_parts_cost + $order_info['order_basic_info'][0]->repair_cost ?>
-                            </div>							
-                            <?php
-                            if ($order_info['order_basic_info'][0]->discount != 0) {
-                                echo '<div class="col-md-3"><h4>';
-                                echo lang('discount');
-                                echo ': ';
-                                echo $order_info['order_basic_info'][0]->discount . " ر.س";
-                                echo '</h4></div>';
-                            }
-                            if ($order_info['order_basic_info'][0]->company == 1) {
-                                if ($order_info['order_basic_info'][0]->company_discount != 0) {
-                                    echo '<div class="col-md-3"><h4>';
-                                    echo lang('company_discount');
-                                    echo ': ';
-                                    echo $order_info['order_basic_info'][0]->company_discount . "%";
-                                    echo '</h4></div>';
-                                }
-                            } else if ($order_info['order_basic_info'][0]->company == 0) {
-                                if ($order_info['order_basic_info'][0]->contact_discount != 0) {
-                                    echo '<div class="col-md-3"><h4>';
-                                    echo lang('customer_discount');
-                                    echo ': ';
-                                    echo $order_info['order_basic_info'][0]->contact_discount . "%";
-                                    echo '</h4></div>';
-                                }
-                            }
-                        }
-                    }
-                }
-                if ($order_info['order_basic_info'][0]->external_repair == 1) {
-                    if ($order_info['order_basic_info'][0]->status_id != 5 && $order_info['order_basic_info'][0]->status_id != 6 && $order_info['order_basic_info'][0]->status_id != 4) {
-                        ?>
-                        <div class = "col-md-3">
-                            <h4><?php echo lang('visite_date');
-                        ?></h4>
-                            <?php echo $order_info['order_basic_info'][0]->visite_date ?>
-                        </div>
-                        <div class="col-md-3">
-                            <h4><?php echo lang('visite_cost'); ?></h4>
-                            <?php echo $order_info['order_basic_info'][0]->visite_cost; ?>
-                        </div>
-                        <div class="col-md-3">
-                            <h4><?php echo lang('cost_estimation'); ?></h4>
-                            <?php echo $order_info['order_basic_info'][0]->estimated_cost; ?>	
-                        </div>
-                        <?php
-                    }
-                }
-                if ($order_info['order_basic_info'][0]->under_warranty != 1) {
-                    if ($order_info['order_basic_info'][0]->examine_date == 0 && $order_info['order_basic_info'][0]->status_id != 5 && $order_info['order_basic_info'][0]->status_id != 6 && $order_info['order_basic_info'][0]->status_id != 4) {
-                        ?>
-                        <div class="col-md-3">
-                            <h4><?php echo lang('total_cost'); ?></h4>
-                            <?php echo $order_info['order_basic_info'][0]->spare_parts_cost + $order_info['order_basic_info'][0]->repair_cost ?>
-                        </div>
-                        <div class="col-md-3">
-                            <h4><?php echo lang('delivery_date'); ?></h4>
-                            <?php echo lang('during') . " " . $order_info['order_basic_info'][0]->delivery_date . " " . lang('work_day'); ?>
-                        </div>
-                        <?php if ($order_info['order_basic_info'][0]->under_warranty != 1) {
-                            ?>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('cost_estimation'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->estimated_cost; ?>	
-                            </div>
-                            <?php
-                        }
-                    } else if ($order_info['order_basic_info'][0]->delivery_date == 0 && $order_info['order_basic_info'][0]->status_id != 5 && $order_info['order_basic_info'][0]->status_id != 6 && $order_info['order_basic_info'][0]->status_id != 4) {
-                        ?>
-                        <div class="col-md-3">
-                            <h4><?php echo lang('examine_date'); ?></h4>
-                            <?php echo lang('during') . " " . $order_info['order_basic_info'][0]->examine_date . " " . lang('day'); ?>
-                        </div>
-                        <?php if ($order_info['order_basic_info'][0]->under_warranty != 1) {
-                            ?>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('examining_cost'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->examine_cost; ?>
-                            </div>
-                            <?php
-                        }
-                    }
-                }
-                if ($order_info['order_basic_info'][0]->under_warranty == 1) {
-                    ?>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('billNumber'); ?></h4>
-                        <?php echo $order_info['order_basic_info'][0]->billNumber ?>
-                    </div>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('billDate'); ?></h4>
-                        <?php echo $order_info['order_basic_info'][0]->billDate; ?>
-                    </div>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('warranty_period'); ?></h4>
-                        <?php echo $order_info['order_basic_info'][0]->warranty_period . " " . lang('year'); ?>	
-                    </div>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('warranty_times'); ?></h4>
-                        <?php echo ($order_info['order_basic_info'][0]->warranty_times != 0) ? $order_info['order_basic_info'][0]->warranty_times : lang('not_exist'); ?>	
-                    </div>
-                    <?php if ($order_info['order_basic_info'][0]->sent != 0) { ?>
-                        <div class="row">        
-                            <!--                            <div class="col-md-3">
-                                                            <h4><?php echo lang('received'); ?></h4>
-                                                        </div>-->
-                            <div class="col-md-3">
-                                <h4><?php echo lang('shipping_company'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->shipping_company ?>
-                            </div>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('bill_of_lading'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->bill_of_lading; ?>
-                            </div>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('agent_name'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->agent_name; ?>	
-                            </div>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('received_date'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->received_date; ?>	
-                            </div>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('arrived_receipt_number'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->arrived_receipt_number ?>
-                            </div>
-                            <div class="col-md-3">
-                                <h4><?php echo lang('receipt_employee'); ?></h4>
-                                <?php echo $order_info['order_basic_info'][0]->receipt_employee_name; ?>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                }
-
-                if ($order_info['order_basic_info'][0]->external_repair != 0) {
-                    ?>
-                    <!--                        <div class="col-md-3">
-                                                <h4><?php echo lang('external_repair'); ?></h4>
-                                            </div>-->
-                <?php } ?>
-            </div>
+            <h2 align="center"><?php echo lang('notes'); ?> </h2>
             <?php
-            if ($order_info['order_basic_info'][0]->temporary_device) {
-                $device = $order_info['order_basic_info'][0]->temporary_device;
-                ?>
-                <div class="row cont-inf2">   
-                    <h4><?php echo lang('temporary_device_given') ?></h4>
-
-                    <div class="col-md-3">
-                        <h4><?php echo lang('machine_type'); ?></h4>
-                        <?php echo $device->machine_type ?>
-                    </div>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('brand'); ?></h4>
-                        <?php echo $device->brand; ?>
-                    </div>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('model'); ?></h4>
-                        <?php echo $device->model; ?>	
-                    </div>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('color'); ?></h4>
-                        <?php echo $device->color; ?>	
-                    </div>
-                    <div class="col-md-3">
-                        <h4><?php echo lang('serial_no'); ?></h4>
-                        <?php echo $device->serial_number; ?>	
-                    </div>
-                    <?php if ($device->faults != "") { ?>
-                        <div class="col-md-3">
-                            <h4><?php echo lang('faults'); ?></h4>
-                            <?php echo $device->faults; ?>	
-                        </div>
-                    <?php } ?>
-                    <?php if ($device->accessories != "") { ?>
-                        <div class="col-md-3">
-                            <h4><?php echo lang('accessories'); ?></h4>
-                            <?php echo $device->accessories; ?>	
-                        </div>
-                    <?php } ?>
-                </div>
-            <?php } ?>
-            <div class="row cont-inf2">
-                <?php
-                if ($order_info['accessories']->notes != "") {
-                    echo '<h3>' . lang("accessories") . '</h3>';
-
-                    echo '<td>' . $order_info['accessories']->notes . '</td>';
-                } else {
-                    echo '<h3>' . lang("accessories") . '</h3>';
-
-                    echo lang('not_exist');
-                }
-                ?>
-            </div>
-            <div class="row cont-inf2">
-                <h2 align="center"><?php echo lang('notes'); ?> </h2>
-                <?php
-                if ($order_info['order_basic_info'][0]->notes != '')
-                    echo $order_info['order_basic_info'][0]->notes . "<br>";
-                else if ($order_info['order_basic_info'][0]->notes == '' && $order_info['order_basic_info'][0]->Receipt == 1)
-                    echo lang('not_exist');
-                if ($order_info['order_basic_info'][0]->Receipt != 1) {// && $just_received)
-                    echo "<h4>" . lang('No Receipt') . "<br>" . lang('ID') . "</h4>" . $order_info['order_basic_info'][0]->receipt_name . " " . $order_info['order_basic_info'][0]->IDnum . "<br>";
-                }
-                ?>
-                <?php
-                if ($order_info['current_status']->status_id != 5 && $order_info['current_status']->status_id != 6 && $order_info['order_basic_info'][0]->under_warranty != 1) {
-                    echo "<br><br>" . lang('order_tech') . " : ";
-                    echo $order_technician;
-                }
-                if ($order_info['order_basic_info'][0]->under_warranty == 1) {
-                    echo '<h4>';
-                    echo lang('order_received_by');
-                    echo ': ';
-                    echo $order_info['actions'][0]->user_name;
-                    echo '</h4>';
-                }
-                if ($order_info['order_basic_info'][0]->allow_losing_data == 1) {
-                    echo '<h4>';
-                    echo lang('allow_losing_data');
-                    echo ': ';
-                    echo lang('YES');
-                    echo '</h4>';
-                } else {
-                    
-                }
-                ?>
-            </div>
-            <div class="row">
-                <h2 align="center" <?php
-                if ($just_received == 1) {
-                    echo 'style="display:none;"';
-                }
-                ?>><?php echo lang('order_history'); ?></h2>
-                <div class="table_div_" <?php
-                if ($just_received == 1) {
-                    echo 'style="display:none;"';
-                }
-                ?>>
-                    <div style="text-align: right" class ="table-responsive">
-                        <table id="order_history" class="display">
-                            <thead>
-                            <th><?php echo lang('date'); ?></th>
-                            <th><?php echo lang('user'); ?></th>
-                            <th><?php echo lang('action'); ?></th>
-                            <th><?php echo lang('description'); ?></th>
-                            <th><?php echo lang('repair_cost'); ?></th>
-                            <th><?php echo lang('spare_parts_cost'); ?></th>
-                            <th><?php echo lang('total_cost'); ?></th>
-                            </thead>
-                            <tbody>
-                                <?php
-                                foreach ($order_info['actions'] as $action) {
-                                    if ($action->name == 'Delivered' || $action->name == 'Set Ready' || $action->name == 'Recieved' || $action->name == 'Assigned To Technician' || $action->name == 'Edited' || $action->name == 'Cancelled' || $action->categories_id == 9 || $action->categories_id == 10 || $action->categories_id == 11 || $action->categories_id == 12 || $action->categories_id == 13) {
-                                        if ($action->description == 'Examined')
-                                            echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang('Examined') . "</td><td></td>";
-                                        else if ($action->categories_id == 10)
-                                            echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . lang('message') . " : " . $action->description . "</td><td></td>";
-                                        else if ($action->name == 'Cancelled' || $action->name == 'Set Ready')
-                                            echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . (($order_info['order_basic_info'][0]->external_repair != 1) ? lang('place') . " :" : "") . $action->description . "</td><td></td>";
-                                        else if ($action->categories_id == 5) {
-                                            if ($order_info['order_basic_info'][0]->Receipt != 1) {
-                                                echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . lang('ID') . $order_info['order_basic_info'][0]->receipt_name . " " . $order_info['order_basic_info'][0]->IDnum . "</td>";
-                                            } else {
-                                                echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . $action->description . "</td>";
-                                            }
-                                        } else if ($action->categories_id == 11) {
-                                            echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . lang('agreed') . ": " . $action->description . "</td><td></td>";
-                                        } else if ($action->categories_id == 13) {
-                                            echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang('machine_back') . " " . $action->description . "</td><td>" . lang($action->description) . " ";
-                                            if ($order_info['order_basic_info'][0]->state_after_repairing == 1)
-                                                echo lang('repaired');
-                                            else if ($order_info['order_basic_info'][0]->state_after_repairing == 2) {
-                                                echo lang('out_of_warranty') . ", " . lang('reason_out_of_warranty') . ": " . $order_info['order_basic_info'][0]->out_of_warranty_reason;
-                                            } else if ($order_info['order_basic_info'][0]->state_after_repairing == 3)
-                                                echo lang('replaced') . " " . lang('serial_no') . ": " . $order_info['order_basic_info'][0]->new_machine_serial_number;
-                                            echo "</td><td></td>";
-                                        } else
+            if ($order_info['order_basic_info'][0]->notes != '')
+                echo $order_info['order_basic_info'][0]->notes . "<br>";
+            else if ($order_info['order_basic_info'][0]->notes == '' && $order_info['order_basic_info'][0]->Receipt == 1)
+                echo lang('not_exist');
+            if ($order_info['order_basic_info'][0]->Receipt != 1) {// && $just_received)
+                echo "<h4>" . lang('No Receipt') . "<br>" . lang('ID') . "</h4>" . $order_info['order_basic_info'][0]->receipt_name . " " . $order_info['order_basic_info'][0]->IDnum . "<br>";
+            }
+            ?>
+            <?php
+            if ($order_info['current_status']->status_id != 5 && $order_info['current_status']->status_id != 6 && $order_info['order_basic_info'][0]->under_warranty != 1) {
+                echo "<br><br>" . lang('order_tech') . " : ";
+                echo $order_technician;
+            }
+            if ($order_info['order_basic_info'][0]->under_warranty == 1) {
+                echo '<h4>';
+                echo lang('order_received_by');
+                echo ': ';
+                echo $order_info['actions'][0]->user_name;
+                echo '</h4>';
+            }
+            if ($order_info['order_basic_info'][0]->allow_losing_data == 1) {
+                echo '<h4>';
+                echo lang('allow_losing_data');
+                echo ': ';
+                echo lang('YES');
+                echo '</h4>';
+            } else {
+                
+            }
+            ?>
+        </div>
+        <div class="row">
+            <h2 align="center" <?php
+            if ($just_received == 1) {
+                echo 'style="display:none;"';
+            }
+            ?>><?php echo lang('order_history'); ?></h2>
+            <div class="table_div_" <?php
+            if ($just_received == 1) {
+                echo 'style="display:none;"';
+            }
+            ?>>
+                <div style="text-align: right" class ="table-responsive">
+                    <table id="order_history" class="display">
+                        <thead>
+                        <th><?php echo lang('date'); ?></th>
+                        <th><?php echo lang('user'); ?></th>
+                        <th><?php echo lang('action'); ?></th>
+                        <th><?php echo lang('description'); ?></th>
+                        <th><?php echo lang('repair_cost'); ?></th>
+                        <th><?php echo lang('spare_parts_cost'); ?></th>
+                        <th><?php echo lang('total_cost'); ?></th>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach ($order_info['actions'] as $action) {
+                                if ($action->name == 'Delivered' || $action->name == 'Set Ready' || $action->name == 'Recieved' || $action->name == 'Assigned To Technician' || $action->name == 'Edited' || $action->name == 'Cancelled' || $action->categories_id == 9 || $action->categories_id == 10 || $action->categories_id == 11 || $action->categories_id == 12 || $action->categories_id == 13) {
+                                    if ($action->description == 'Examined')
+                                        echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang('Examined') . "</td><td></td>";
+                                    else if ($action->categories_id == 10)
+                                        echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . lang('message') . " : " . $action->description . "</td><td></td>";
+                                    else if ($action->name == 'Cancelled' || $action->name == 'Set Ready')
+                                        echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . (($order_info['order_basic_info'][0]->external_repair != 1 and $order_info['order_basic_info'][0]->canceled == 0) ? lang('place') . " :" : "") . $action->description . "</td><td></td>";
+                                    else if ($action->categories_id == 5) {
+                                        if ($order_info['order_basic_info'][0]->Receipt != 1) {
+                                            echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . lang('ID') . $order_info['order_basic_info'][0]->receipt_name . " " . $order_info['order_basic_info'][0]->IDnum . "</td>";
+                                        } else {
                                             echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . $action->description . "</td>";
+                                        }
+                                    } else if ($action->categories_id == 11) {
+                                        echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . lang('agreed') . ": " . $action->description . "</td><td></td>";
+                                    } else if ($action->categories_id == 13) {
+                                        echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang('machine_back') . " " . $action->description . "</td><td>" . lang($action->description) . " ";
+                                        if ($order_info['order_basic_info'][0]->state_after_repairing == 1)
+                                            echo lang('repaired');
+                                        else if ($order_info['order_basic_info'][0]->state_after_repairing == 2) {
+                                            echo lang('out_of_warranty') . ", " . lang('reason_out_of_warranty') . ": " . $order_info['order_basic_info'][0]->out_of_warranty_reason;
+                                        } else if ($order_info['order_basic_info'][0]->state_after_repairing == 3)
+                                            echo lang('replaced') . " " . lang('serial_no') . ": " . $order_info['order_basic_info'][0]->new_machine_serial_number;
+                                        echo "</td><td></td>";
+                                    } else
+                                        echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . $action->description . "</td>";
 
-                                        echo "<td class = 'cost'></td><td class = 'cost'>";
-                                        echo "</td><td ></td>";
-                                    }
-                                    else {
-                                        echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . $action->description . "</td><td class = 'cost'>" . $action->repair_cost . "</td><td class = 'cost'>";
-                                        echo $action->spare_parts_cost . "</td><td class='final_total' >" . ($action->spare_parts_cost + $action->repair_cost) . "</td>";
-                                    }
+                                    echo "<td class = 'cost'></td><td class = 'cost'>";
+                                    echo "</td><td ></td>";
                                 }
-                                ?>	
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <?php
-            if ($order_info['order_basic_info'][0]->under_warranty == 1 and ! ( $order_info['current_status']->status_id == 4 or $order_info['current_status']->status_id == 5)) {
-                ?>
-                <div class="row">
-                    <div class="col-md-4"></div>
-                    <div class="col-md-4">
-                        <h2 align="center"><br><?php echo lang('machine_back') ?></h2>
-                        <br>
-                        <select class="form-control" name="machine_back" onchange="machine_back(this)">
-                            <option value="1"><?php echo lang('repaired') ?></option>
-                            <option value="2"><?php echo lang('out_of_warranty') ?></option>
-                            <option value="3"><?php echo lang('replaced') ?></option>
-                        </select> <br>
-                        <input type="text" class="form-control datepicker" name="back_from_warranty_date" />
-                        <br>
-                        <input style="display: none" class="form-control" type="text" name="out_of_warranty" placeholder="<?php echo lang('reason_out_of_warranty') ?>" />
-
-                        <input style="display: none" class="form-control" type="text" name="new_serial_number" placeholder="<?php echo lang('serial_no') ?>" />
-                        <br>
-                        <input class="btn btn-primary" style="width:auto !important" id="set_back_and_ready" type="submit" value="<?php echo lang('set_order_status_to_done') ?>" /><br>
-                        <?php if (!$order_info['order_basic_info'][0]->temporary_device) { ?>
-                            <input class="btn btn-primary" style="width:auto !important" id="temporary_device" type="submit" value="<?php echo lang('temporary_device') ?>" />
-                        <?php } ?>
-                    </div>
-                    <div class="col-md-4"></div>
-                </div>
-            <?php } else {
-                ?>
-                <div class="row" id= "perform_reoair_action">
-                    <?php
-                    $uname = trim($this->session->userdata('user_name'));
-                    $order_technician = trim($order_technician);
-
-                    if (permission_included($user_permissions, 'Perform Repair Action')
-                            // and ($order_technician == $uname)
-                            and $order_info['current_status']->status_id == 2) {
-                        if ($order_info['current_status']->categories_id == 9) {
-                            echo '<h2 align="center"><br>' . lang('examining_result') . '</h2>';
-                            echo '<h4>' . lang('fault_description') . '</h4>';
-                            echo '<textarea rows = "3" cols="40" style="width: 45%; min-width: 45%; max-width: 45%" class="form-control" name="description" id="result_fault_description"></textarea>';
-                            echo '<h4>' . lang('cost_estimation') . '</h4>';
-                            echo '<input style="width: 30%" type="text" name="cost" id="result_estimated_cost" class="form-control input-md numeric_input" min=0/>';
-                            echo '<h4>' . lang('delivery_date') . '</h4>';
-                            $options = array();
-                            for ($i = 1; $i <= 100; $i++) {
-                                $options[$i] = $i;
+                                else {
+                                    echo "<tr><td>" . $action->date . "</td><td>" . $action->user_name . "</td><td>" . lang($action->name) . "</td><td>" . $action->description . "</td><td class = 'cost'>" . $action->repair_cost . "</td><td class = 'cost'>";
+                                    echo $action->spare_parts_cost . "</td><td class='final_total' >" . ($action->spare_parts_cost + $action->repair_cost) . "</td>";
+                                }
                             }
-                            echo lang('during') . " " . form_dropdown('result_expected_examine_date', $options, '', 'id="result_delivery_date"') . " " . lang('work_day');
-                            echo '<input  class="submit_btn3" type="submit" name="submit" id="submit_results" value="' . lang('submit') . '" status_id="2" categories_id="3" action_name="Repair Action Performed" /><br>';
-                            echo '<input class="submit_btn" type="submit" name="submit" id="submit" value="' . lang('set_order_status_to_cancelled') . '!" status_id="4" categories_id="4" action_name="Cancelled" status_name="Cancelled"/><br>';
-                        } else {
-                            echo '<div class="row">';
-                            echo '<div class="col">';
-                            echo '<h2 align="center"><br>' . lang('perform_repair_action') . '</h2>';
-                            echo '<h4>' . lang('description') . ' </h4>';
-                            echo '<textarea rows = "3" cols="40" name="description" style="width: 45%; min-width: 45%; max-width: 45%" class="form-control" id="description"></textarea>';
-                            echo '<h4>' . lang('repair_cost') . '</h4>';
-                            echo '<input type="text" style="width: 30%" name="cost" id="rep_cost" value="0" class="form-control input-md numeric_input" min=0/>';
-                            if ($order_info['order_basic_info'][0]->electronic == 1 ||
-                                    $order_info['order_basic_info'][0]->external_repair == 1
-                            ) {
-                                echo '<h4>' . lang('spare_parts_cost') . '</h4>';
-
-                                echo '<input type="text" style="width: 30%" name="cost" id="parts_cost" value="0" class="form-control input-md numeric_input" min=0/>';
-                            }
-                            echo '<h4>' . lang('total') . ': </h4>';
-                            echo '<input type="text" style="width: 30%" id="tot" value="0" class="form-control input-md numeric_input" readonly = "readonly"/>';
-
-                            echo '<br>';
-
-                            echo '<input class="submit_btn" type="submit" name="submit" id="submit" value="' . lang('save_action') . '!" status_id="2" categories_id="3" action_name="Repair Action Performed" /><br>';
-
-                            if ($order_info['order_basic_info'][0]->external == 1)
-                                echo '<input class="submit_btn" type="submit" name="submit" id="ready" value="' . lang('set_to_ready_external') . '" status_id="5" categories_id="7" action_name="Changed Status" status_name="Ready"/><br></div>';
-                            else {
-
-                                echo '<input class="submit_btn" type="submit" name="submit" id="ready" value="' . lang('set_order_status_to_done') . '" status_id="5" categories_id="7" action_name="Changed Status" status_name="Ready"/><br></div>';
-                            }
-                            echo '<input class="submit_btn" type="submit" name="submit" id="customer_call" value="' . lang('customer_call') . '" status_id="4" categories_id="11" action_name="customer called" status_name="Ready"/><br>';
-                            echo '<input class="submit_btn" type="submit" name="submit" id="cancel" value="' . lang('set_order_status_to_cancelled') . '!" status_id="4" categories_id="4" action_name="Cancelled" status_name="Cancelled"/><br>';
-                            echo '<a id="send" class="submit_btn" href="' . base_url() . 'index.php/order/load_message_page/' . $order_info['order_basic_info'][0]->id . '/';
-                            echo $order_info['order_basic_info'][0]->contact_phone . '">' . lang('send_message_to_customer') . '</a><br>';
-                            echo '</div></div>';
-                        }
-                    }
-                    ?>
-
+                            ?>	
+                        </tbody>
+                    </table>
                 </div>
-            <?php } ?>
-            <div id= "deliver_to_customer" class="row">
-                <?php
-                if (permission_included($user_permissions, 'Receive an order')
-                        and ( $order_info['current_status']->status_id == 4 or $order_info['current_status']->status_id == 5)) {
-                    echo '<br>';
-                    if ($order_info['order_basic_info'][0]->external_repair != 1)
-                        echo '<h2 align="center">' . lang('deliver_to_customer') . '</h2>';
-                    else
-                        echo '<h2 align="center">' . lang('export_bill') . '</h2>';
-                    if ($order_info['order_basic_info'][0]->under_warranty == 1)
-                        $btn = lang('deliver_to_customer');
-                    else
-                        $btn = lang('pay');
-                    if ($order_info['order_basic_info'][0]->under_warranty != 1) {
-                        if ($order_info['current_status']->status_id == 4) {
-                            echo '<h4>' . lang('total_cost') . " (" . lang('examining_cost') . ")" . $order_info['order_basic_info'][0]->examine_cost . '</h4>';
-                            echo '<h4>' . lang('cash') . '</h4>';
-                            echo '<input type="text" id="cash2" id="cash2" style="width: 30%" class="form-control input-md numeric_input" min=0.0/>';
-                        } else {
-                            echo '<h4 id="total_cost" colspan=2></h4>';
-                            echo '<h4>' . lang('cash') . '</h4>';
-                            echo '<input type="text" id="cash" id="cash" style="width: 30%" class="form-control input-md numeric_input" class="numeric_input" min=0.0/>';
-                        }
-                        echo '<h4>' . lang('discount') . ': </h4>';
-                        echo '<input type="text" id="discount" style="width: 30%" class="form-control input-md numeric_input" value="0"  />';
-                        if (
-                                $order_info['order_basic_info'][0]->company == 1 &&
-                                $order_info['order_basic_info'][0]->company_discount != 0
-                        ) {
-                            echo '<h4>' . lang('company_discount') . ': </h4>';
-                            echo '<input type="text" id="discount" style="width: 30%" class="form-control input-md numeric_input" disabled value="' . $order_info['order_basic_info'][0]->company_discount . '%"  />';
-                        } else if (
-                                $order_info['order_basic_info'][0]->company == 0 &&
-                                $order_info['order_basic_info'][0]->contact_discount != 0
-                        ) {
-                            echo '<h4>' . lang('customer_discount') . ': </h4>';
-                            echo '<input type="text" id="discount" style="width: 30%" class="form-control input-md numeric_input" disabled value="' . $order_info['order_basic_info'][0]->contact_discount . '%"  />';
-                        }
-                        echo '<h4>' . lang('customer_points') . ': </h4>';
-                        echo '<input type="text" id="points" style="width: 30%;display:inline; margin-left:5px" class="form-control input-md numeric_input" disabled value="' . $order_info['order_basic_info'][0]->customer_points . '"  />';
-                        if ($order_info['order_basic_info'][0]->customer_points >= 100) {
-                            echo '<input class="btn btn-primary replace_points" points="50" type="submit" style="display:inline" name="submit" value="' . lang('replace_points') . ' 50 "/>';
-                            echo '<input class="btn btn-primary replace_points" points="100" type="submit" style="margin:5px;display:inline" name="submit" value="' . lang('replace_points') . ' 100"/>';
-                        }
-                        echo '<h4>' . lang('remaining') . '</h4>';
-                        echo '<input type="text" style="width: 30%" class="form-control input-md numeric_input" id="remaining" class="numeric_input" readonly = "readonly"/>';
-                    }
-                    echo '<h4><input type="checkbox" id="noReceipt" value="1"/>' . lang('No Receipt') . '</h4>';
-                    echo '<h4>' . lang("ID") . '</h4>';
-                    echo '<input type="text" style="width: 30%" class="form-control input-md numeric_input" id="IDnum" disabled="1"  class="numeric_input" min=0.0/></td></tr>';
-                    echo '<h4>' . lang("recipient") . '</h4>';
-                    echo '<input type="text" style="width: 30%" class="form-control input-md " id="receipt" disabled="1" /></td></tr>';
-                    if ($order_info['order_basic_info'][0]->temporary_device) {
-                        echo '<p align="center" style="color:#a94442;font-size:16px">' . lang('temporary_device_given') . '</p>';
-                    }
-                    echo '<div ><input class="submit_btn btn btn-primary" type="submit" name="submit" id="PayButton" value="' . $btn . ' ! " status_id="6" categories_id="5" action_name="Close" status_name="Closed"/><br></div>';
-                    echo '<a id="DistructedButton" style="color:#a94442;cursor:pointer">' . lang('distructed') . '</a><br></div>';
-                }
-                ?>
             </div>
         </div>
+        <?php
+        if ($order_info['order_basic_info'][0]->under_warranty == 1 and ! ( $order_info['current_status']->status_id == 4 or $order_info['current_status']->status_id == 5)) {
+            ?>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <h2 align="center"><br><?php echo lang('machine_back') ?></h2>
+                    <br>
+                    <select class="form-control" name="machine_back" onchange="machine_back(this)">
+                        <option value="1"><?php echo lang('repaired') ?></option>
+                        <option value="2"><?php echo lang('out_of_warranty') ?></option>
+                        <option value="3"><?php echo lang('replaced') ?></option>
+                    </select> <br>
+                    <input type="text" class="form-control datepicker" name="back_from_warranty_date" />
+                    <br>
+                    <input style="display: none" class="form-control" type="text" name="out_of_warranty" placeholder="<?php echo lang('reason_out_of_warranty') ?>" />
+
+                    <input style="display: none" class="form-control" type="text" name="new_serial_number" placeholder="<?php echo lang('serial_no') ?>" />
+                    <br>
+                    <input class="btn btn-primary" style="width:auto !important" id="set_back_and_ready" type="submit" value="<?php echo lang('set_order_status_to_done') ?>" /><br>
+                    <?php if (!$order_info['order_basic_info'][0]->temporary_device) { ?>
+                        <input class="btn btn-primary" style="width:auto !important" id="temporary_device" type="submit" value="<?php echo lang('temporary_device') ?>" />
+    <?php } ?>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+            <?php } else {
+                ?>
+            <div class="row" id= "perform_reoair_action">
+                <?php
+                $uname = trim($this->session->userdata('user_name'));
+                $order_technician = trim($order_technician);
+
+                if (permission_included($user_permissions, 'Perform Repair Action')
+                        // and ($order_technician == $uname)
+                        and $order_info['current_status']->status_id == 2) {
+                    if ($order_info['current_status']->categories_id == 9) {
+                        echo '<h2 align="center"><br>' . lang('examining_result') . '</h2>';
+                        echo '<h4>' . lang('fault_description') . '</h4>';
+                        echo '<textarea rows = "3" cols="40" style="width: 45%; min-width: 45%; max-width: 45%" class="form-control" name="description" id="result_fault_description"></textarea>';
+                        echo '<h4>' . lang('cost_estimation') . '</h4>';
+                        echo '<input style="width: 30%" type="text" name="cost" id="result_estimated_cost" class="form-control input-md numeric_input" min=0/>';
+                        echo '<h4>' . lang('delivery_date') . '</h4>';
+                        $options = array();
+                        for ($i = 1; $i <= 100; $i++) {
+                            $options[$i] = $i;
+                        }
+                        echo lang('during') . " " . form_dropdown('result_expected_examine_date', $options, '', 'id="result_delivery_date"') . " " . lang('work_day');
+                        echo '<input  class="submit_btn3" type="submit" name="submit" id="submit_results" value="' . lang('submit') . '" status_id="2" categories_id="3" action_name="Repair Action Performed" /><br>';
+                        echo '<input class="submit_btn" type="submit" name="submit" id="submit" value="' . lang('set_order_status_to_cancelled') . '!" status_id="4" categories_id="4" action_name="Cancelled" status_name="Cancelled"/><br>';
+                    } else {
+                        echo '<div class="row">';
+                        echo '<div class="col">';
+                        echo '<h2 align="center"><br>' . lang('perform_repair_action') . '</h2>';
+                        echo '<h4>' . lang('description') . ' </h4>';
+                        echo '<textarea rows = "3" cols="40" name="description" style="width: 45%; min-width: 45%; max-width: 45%" class="form-control" id="description"></textarea>';
+                        echo '<h4>' . lang('repair_cost') . '</h4>';
+                        echo '<input type="text" style="width: 30%" name="cost" id="rep_cost" value="0" class="form-control input-md numeric_input" min=0/>';
+                        if ($order_info['order_basic_info'][0]->electronic == 1 ||
+                                $order_info['order_basic_info'][0]->external_repair == 1
+                        ) {
+                            echo '<h4>' . lang('spare_parts_cost') . '</h4>';
+
+                            echo '<input type="text" style="width: 30%" name="cost" id="parts_cost" value="0" class="form-control input-md numeric_input" min=0/>';
+                        }
+                        ?>
+                        <div class="input-group mt-3">
+                            <!--<br>-->
+                            <h4><?php echo lang('replace_image') ?></h4>
+                            <div class="custom-file">
+                                <input id="inputGroupFile01" name="replace_image" type="file" class="custom-file-input">
+                                <label class="custom-file-label" for="inputGroupFile01"></label>
+                            </div>
+                        </div>
+                        <?php
+                        echo '<h4>' . lang('total') . ': </h4>';
+                        echo '<input type="text" style="width: 30%" id="tot" value="0" class="form-control input-md numeric_input" readonly = "readonly"/>';
+
+                        echo '<br>';
+
+                        echo '<input class="submit_btn sub_btn" type="submit" name="submit" id="submit" value="' . lang('save_action') . '!" status_id="2" categories_id="3" action_name="Repair Action Performed" /><br>';
+
+                        if ($order_info['order_basic_info'][0]->external == 1)
+                            echo '<input class="submit_btn" type="submit" name="submit" id="ready" value="' . lang('set_to_ready_external') . '" status_id="5" categories_id="7" action_name="Changed Status" status_name="Ready"/><br></div>';
+                        else {
+
+                            echo '<input class="submit_btn" type="submit" name="submit" id="ready" value="' . lang('set_order_status_to_done') . '" status_id="5" categories_id="7" action_name="Changed Status" status_name="Ready"/><br></div>';
+                        }
+                        echo '<input class="submit_btn" type="submit" name="submit" id="customer_call" value="' . lang('customer_call') . '" status_id="4" categories_id="11" action_name="customer called" status_name="Ready"/><br>';
+                        echo '<input class="submit_btn" type="submit" name="submit" id="cancel" value="' . lang('set_order_status_to_cancelled') . '!" status_id="4" categories_id="4" action_name="Cancelled" status_name="Cancelled"/><br>';
+                        echo '<a id="send" class="submit_btn" href="' . base_url() . 'index.php/order/load_message_page/' . $order_info['order_basic_info'][0]->id . '/';
+                        echo $order_info['order_basic_info'][0]->contact_phone . '">' . lang('send_message_to_customer') . '</a><br>';
+                        echo '</div></div>';
+                    }
+                }
+                ?>
+
+            </div>
+            <?php } ?>
+        <div id= "deliver_to_customer" class="row">
+            <?php
+            if (permission_included($user_permissions, 'Receive an order')
+                    and ( $order_info['current_status']->status_id == 4 or $order_info['current_status']->status_id == 5) and $order_info['order_basic_info'][0]->canceled == 0) {
+                echo '<br>';
+                if ($order_info['order_basic_info'][0]->external_repair != 1)
+                    echo '<h2 align="center">' . lang('deliver_to_customer') . '</h2>';
+                else
+                    echo '<h2 align="center">' . lang('export_bill') . '</h2>';
+                if ($order_info['order_basic_info'][0]->under_warranty == 1)
+                    $btn = lang('deliver_to_customer');
+                else
+                    $btn = lang('pay');
+                if ($order_info['order_basic_info'][0]->under_warranty != 1) {
+                    if ($order_info['current_status']->status_id == 4) {
+                        echo '<h4>' . lang('total_cost') . " (" . lang('examining_cost') . ")" . $order_info['order_basic_info'][0]->examine_cost . '</h4>';
+                        echo '<h4>' . lang('cash') . '</h4>';
+                        echo '<input type="text" id="cash2" id="cash2" style="width: 30%" class="form-control input-md numeric_input" min=0.0/>';
+                    } else {
+                        echo '<h4 id="total_cost" colspan=2></h4>';
+                        echo '<h4>' . lang('cash') . '</h4>';
+                        echo '<input type="text" id="cash" id="cash" style="width: 30%" class="form-control input-md numeric_input" class="numeric_input" min=0.0/>';
+                    }
+                    echo '<h4>' . lang('discount') . ': </h4>';
+                    echo '<input type="text" id="discount" style="width: 30%" class="form-control input-md numeric_input" value="0"  />';
+                    if (
+                            $order_info['order_basic_info'][0]->company == 1 &&
+                            $order_info['order_basic_info'][0]->company_discount != 0
+                    ) {
+                        echo '<h4>' . lang('company_discount') . ': </h4>';
+                        echo '<input type="text" id="discount" style="width: 30%" class="form-control input-md numeric_input" disabled value="' . $order_info['order_basic_info'][0]->company_discount . '%"  />';
+                    } else if (
+                            $order_info['order_basic_info'][0]->company == 0 &&
+                            $order_info['order_basic_info'][0]->contact_discount != 0
+                    ) {
+                        echo '<h4>' . lang('customer_discount') . ': </h4>';
+                        echo '<input type="text" id="discount" style="width: 30%" class="form-control input-md numeric_input" disabled value="' . $order_info['order_basic_info'][0]->contact_discount . '%"  />';
+                    }
+                    echo '<h4>' . lang('customer_points') . ': </h4>';
+                    echo '<input type="text" id="points" style="width: 30%;display:inline; margin-left:5px" class="form-control input-md numeric_input" disabled value="' . $order_info['order_basic_info'][0]->customer_points . '"  />';
+                    if ($order_info['order_basic_info'][0]->customer_points >= 100) {
+                        echo '<input class="btn btn-primary replace_points" points="50" type="submit" style="display:inline" name="submit" value="' . lang('replace_points') . ' 50 "/>';
+                        echo '<input class="btn btn-primary replace_points" points="100" type="submit" style="margin:5px;display:inline" name="submit" value="' . lang('replace_points') . ' 100"/>';
+                    }
+                    echo '<h4>' . lang('remaining') . '</h4>';
+                    echo '<input type="text" style="width: 30%" class="form-control input-md numeric_input" id="remaining" class="numeric_input" readonly = "readonly"/>';
+                }
+                echo '<h4><input type="checkbox" id="noReceipt" value="1"/>' . lang('No Receipt') . '</h4>';
+                echo '<h4>' . lang("ID") . '</h4>';
+                echo '<input type="text" style="width: 30%" class="form-control input-md numeric_input" id="IDnum" disabled="1"  class="numeric_input" min=0.0/></td></tr>';
+                echo '<h4>' . lang("recipient") . '</h4>';
+                echo '<input type="text" style="width: 30%" class="form-control input-md " id="receipt" disabled="1" /></td></tr>';
+                if ($order_info['order_basic_info'][0]->temporary_device) {
+                    echo '<p align="center" style="color:#a94442;font-size:16px">' . lang('temporary_device_given') . '</p>';
+                }
+                echo '<div ><input class="submit_btn btn btn-primary" type="submit" name="submit" id="PayButton" value="' . $btn . ' ! " status_id="6" categories_id="5" action_name="Close" status_name="Closed"/><br></div>';
+                echo '<a id="DistructedButton" style="color:#a94442;cursor:pointer">' . lang('distructed') . '</a><br></div>';
+            }
+            ?>
+
+
+        </div>
+        <?php
+        if (permission_included($user_permissions, 'Perform Repair Action')
+                and $order_info['current_status']->status_id == 6 and $order_info['order_basic_info'][0]->canceled == 0) {
+            echo '<br><br><input class="submit_btn btn btn-danger" type="submit" name="" order_id="" id="cancelButton" value="' . lang('cancel_order') . '" status_id="6" categories_id="5" action_name="Close" status_name="Closed"/><br>';
+        }
+        ?>
     </div>
+</div>
 </div>
 
 <?php $this->load->view('modals/view_modals') ?>
@@ -1304,5 +1347,27 @@
 
             }
         });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        bsCustomFileInput.init()
+    });
+    $('#cancelButton').click(function () {
+        var con = window.prompt("<?php echo lang('cancel_order_reason') ?>");
+        if (con != null) {
+            if (con != '') {
+                $.ajax({
+                    type: "get",
+                    url: site_url + "/order/cancel_order/format/json?order_id=" + order_id + "&reason=" + con,
+                    success: function (data) {
+                        location.reload();
+                    },
+                    error: function (response) {
+
+                    }
+                });
+            } else {
+                window.alert("<?php echo lang('enter_reason') ?>");
+            }
+        }
     });
 </script>

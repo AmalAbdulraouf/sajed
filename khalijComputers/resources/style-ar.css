@@ -16,7 +16,11 @@
     direction: rtl;
     padding: 15px
 }
-
+.btn-danger {
+    color: #fff;
+    background-color: #d9534f !important;
+    
+}
 #sticker
 {
     font-size: 8px !important;

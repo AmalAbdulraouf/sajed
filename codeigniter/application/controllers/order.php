@@ -20,8 +20,24 @@ class Order extends CI_Controller {
         $this->load->model('model_order');
     }
 
-    #Main Page	
+    public function call_center_view(){
+        $date = date('Y-m-d');
+        $this->load->model('model_reports');
+        $orders = $this->model_reports->get_delivered_report('2019-01-01load_message_page',$date,"","orders.id","");
+        $data = array(
+            'orders' => $orders
+        );
+        
+         $array = array
+            (
+            'name' => 'view_call_center',
+            'data' => $data
+        );
 
+        $this->load->view('view_template', $array);
+    }
+    
+    #Main Page	
     public function view_order() {
         $just_received = $_GET['just_received'];
         $order_id = $_GET['order_id'];
@@ -49,7 +65,6 @@ class Order extends CI_Controller {
         }
 
         $colors_array = $this->model_colors->get_list_of_colors();
-//            var_dump($colors_array);            die();
         $colors[0] = $this->lang->line('not_selected');
         foreach ($colors_array as $color) {
             $colors[$color->id] = $color->color_name;
@@ -112,7 +127,13 @@ class Order extends CI_Controller {
             foreach ($technicians_array as $tech) {
                 $technicians[$tech->id] = $tech->user_name;
             }
-
+            $faults_array = $this->model_order->get_faults_list();
+           $faults = array($this->lang->line('other'));
+            foreach ($faults_array as $fault) {
+                $faults[$fault->id] = $fault->text;
+            }
+             
+//            var_dump($faults);die();
             $data = array
                 (
                 'models' => $models,
@@ -120,7 +141,8 @@ class Order extends CI_Controller {
                 'colors' => $colors,
                 'machines_types' => $machines_types,
                 'accessories_categories' => $accessories_categories,
-                'technicians' => $technicians
+                'technicians' => $technicians,
+                'faults' =>$faults
             );
 
             $array = array
@@ -128,7 +150,7 @@ class Order extends CI_Controller {
                 'name' => 'view_add_new_order',
                 'data' => $data
             );
-           // $this->load->view('new/pages/template/template', $array);
+            // $this->load->view('new/pages/template/template', $array);
             $this->load->view('view_template', $array);
         } else {
             redirect(base_url() . 'index.php/main_page/restricted');
@@ -194,6 +216,10 @@ class Order extends CI_Controller {
             $this->form_validation->set_rules('billDate', 'lang:billDate', 'required|trim');
             $this->form_validation->set_rules('billNumber', 'lang:billNumber', 'required|trim');
             $this->form_validation->set_rules('warranty_period', 'lang:warranty_period', 'trim');
+        }
+        if ($this->input->post('new_software') == "1") {
+            $this->form_validation->set_rules('billDate2', 'lang:billDate', 'required|trim');
+            $this->form_validation->set_rules('billNumber2', 'lang:billNumber', 'required|trim');
         }
 
         $this->form_validation->set_rules('fault_description', 'lang:fault_description', 'trim|required');
@@ -263,6 +289,10 @@ class Order extends CI_Controller {
             $this->form_validation->set_rules('billDate', 'lang:billDate', 'required|trim');
             $this->form_validation->set_rules('billNumber', 'lang:billNumber', 'required|trim');
             $this->form_validation->set_rules('warranty_period', 'lang:warranty_period', 'trim');
+        }
+        if ($this->input->post('new_software') == "1") {
+            $this->form_validation->set_rules('billDate2', 'lang:billDate', 'required|trim');
+            $this->form_validation->set_rules('billNumber2', 'lang:billNumber', 'required|trim');
         }
         if ($this->form_validation->run() == FALSE) {
             return false;
@@ -427,6 +457,27 @@ class Order extends CI_Controller {
                 $visite_cost = 0;
                 $visite_date = 0;
             }
+            if ($this->input->post('new_software') == "1") {
+                if ($this->input->post('billNumber2') != '') {
+                    $billNumber = $this->input->post('billNumber2');
+                }
+                if ($this->input->post('billDate2') != '') {
+                    $billDate = $this->todate($this->input->post('billDate2'));
+                }
+//                if ($this->get_chkBox_status('examine_date')) {
+//                    $examine_date = $this->input->post('expected_examine_date');
+//                    $delivery_date = 0;
+//                } else if ($this->get_chkBox_status('delivery_date')) {
+//                    $examine_date = 0;
+//                    $delivery_date = $this->input->post('expected_delivery_date');
+//                }
+                $delivery_date = 0;
+                $examine_date = 0;
+                $examine_cost = 0;
+                $estimated_cost = 0;
+                $visite_cost = 0;
+                $visite_date = 0;
+            }
             if ($this->input->post('external') == "0") {
                 $visite_cost = 0;
                 $visite_date = 0;
@@ -475,7 +526,8 @@ class Order extends CI_Controller {
                 'visite_cost' => $visite_cost,
                 'software' => $this->input->post('software'),
                 'electronic' => $this->input->post('electronic'),
-                'external_repair' => $this->input->post('external')
+                'external_repair' => $this->input->post('external'),
+                'new_software' => $this->input->post('new_software')
             );
             $user_name = $this->session->userdata('user_name');
             $this->load->model('model_order');
@@ -620,7 +672,9 @@ class Order extends CI_Controller {
                 (
                 'orders' => $orders
             );
-            $this->load->view('view_search_orders_results', $data);
+            echo json_encode($data);
+            return json_encode($data);
+//            $this->load->view('view_search_orders_results', $data);
         } else {
             redirect(base_url() . 'index.php');
         }
@@ -968,7 +1022,7 @@ class Order extends CI_Controller {
     }
 
     private function send_message_on_call($order_mun, $moblie, $agreed, $date) {
-        $message = $date . " " . lang('customer called') . " " . lang('agreed') . ": " . $agreed;
+        $message = $date . " " . lang('customer called') . " " . lang('total_cost_spare') . ": " . $agreed;
         $this->send_sms($message, $moblie);
     }
 
@@ -1451,7 +1505,8 @@ class Order extends CI_Controller {
                 'colors' => $colors,
                 'machines_types' => $machines_types,
                 'accessories_categories' => $accessories_categories,
-                'technicians' => $technicians
+                'technicians' => $technicians,
+                'technicians_array' => $technicians_array
             );
 
             $array = array(
@@ -1497,6 +1552,7 @@ class Order extends CI_Controller {
             (
             'orders' => $orders,
             'technicians' => $technicians,
+            'technicians_array' => $technicians_array,
             'tech_id' => $tech_id,
             'status' => $status,
         );
@@ -1778,9 +1834,9 @@ class Order extends CI_Controller {
     }
 
     public function search_order_by_phone() {
-        $order = $_GET['phone'];
         $this->load->model('model_order');
-        $orders = $this->model_order->search_order_by_phone($order);
+//        $orders = $this->model_order->search_order_by_phone($order);
+        $orders = $this->model_order->search_order_by_filters($_GET['number'], $_GET['name'], $_GET['phone'], $_GET['serial_num'], $_GET['type'], $_GET['brand'], $_GET['model'], $_GET['color']);
 //        echo json_encode($orders);
         foreach ($orders as $order) {
             if ($order->current_status_id == 4 || $order->current_status_id == 5) {
@@ -1822,6 +1878,14 @@ class Order extends CI_Controller {
         $this->session->unset_userdata(array('give_attention' => 0));
         $this->session->set_userdata(array('give_attention' => $count));
         $this->model_order->give_excuse($exc, $order_id);
+    }
+    
+    public function cancel_order(){
+        $order_id = $_GET['order_id'];
+        $reason = $_GET['reason'];
+        $user_name = $this->session->userdata('user_name');
+        $this->model_order->cancel($order_id,$reason,$user_name);
+        return true;
     }
 
 }

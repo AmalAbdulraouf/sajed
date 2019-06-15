@@ -138,6 +138,42 @@ class management extends CI_Controller {
             redirect(base_url() . 'index.php/main_page/restricted');
         }
     }
+    
+    public function faults_management($operation = null) {
+        if ($this->check_permission('Manage Lists')) {
+            $this->load->library('Grocery_CRUD');
+            try {
+                $crud = new grocery_CRUD();
+                $crud->set_theme('datatables')
+                        ->set_language('arabic')
+                        ->set_table('faults')
+                        //The record name
+                        ->set_subject($this->lang->line('faults'))
+                        ->columns('text')
+                        ->add_fields('text')
+                        ->edit_fields('text')
+                        ->required_fields('text')
+                        ->unset_export()
+                        ->unset_read()
+                        ->unset_print();
+                $output = $crud->render();
+                $array = array
+                    (
+                    'name' => 'management/faults_management',
+                    'data' => array(
+                        'output' => $output->output,
+                        'js_files' => $output->js_files,
+                        'css_files' => $output->css_files
+                    )
+                );
+                $this->load->view('view_template', $array);
+            } catch (Exception $e) {
+                show_error($e->getMessage() . ' --- ' . $e->getTraceAsString());
+            }
+        } else {
+            redirect(base_url() . 'index.php/main_page/restricted');
+        }
+    }
 
     public function receipt_employee_management($operation = null) {
         if ($this->check_permission('Manage Lists')) {
@@ -464,14 +500,18 @@ class management extends CI_Controller {
 
 
         // Add some data
+         $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A1', 'Date: ')
+                ->setCellValue('B1', date('Y-m-d'))
+                ->setCellValue('C1', '');
         $objPHPExcel->setActiveSheetIndex(0)
-                ->setCellValue('A1', 'Customer Name')
-                ->setCellValue('B1', 'Customer Phone')
-                ->setCellValue('C1', 'Customer E-Mail');
+                ->setCellValue('A2', 'Customer Name')
+                ->setCellValue('B2', 'Customer Phone')
+                ->setCellValue('C2', 'Customer E-Mail');
 
         $this->load->model('model_contacts');
         $customers = $this->model_contacts->get_list_of_customers();
-        $i = 2;
+        $i = 3;
         foreach ($customers as $customer) {
             $objPHPExcel->setActiveSheetIndex(0)
                     ->setCellValue('A' . $i, $customer->first_name . ' ' . $customer->last_name)

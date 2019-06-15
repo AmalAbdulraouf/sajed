@@ -44,7 +44,7 @@
 
 <div class="panel panel-default">
     <div class="panel-heading" style="text-align: center" >
-        <h3 align="center"><?php echo lang('cancelled_not_delivered') ?></h3>
+        <h3 align="center"><?php echo lang('search_results') ?></h3>
     </div>
     <div class="panel-body"  >
         <div  class="row" style="text-align: center">

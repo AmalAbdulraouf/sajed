@@ -64,4 +64,36 @@ class Main extends CI_Controller {
         redirect('main/login');
     }
 
+    public function get_data() {
+        $this->load->model('model_order');
+        $this->load->model('model_colors');
+        $this->load->model('model_brands_and_modles');
+        $brands_array = $this->model_brands_and_modles->get_list_of_brands_having_models();
+        $brands[0] = $this->lang->line('not_selected');
+        foreach ($brands_array as $br) {
+            $brands[$br->id] = $br->name;
+        }
+        $models = $this->model_brands_and_modles->get_list_of_models_by_brand_id($brands[0]->id);
+        $machines_types_array = $this->model_order->get_list_of_machines_types();
+        $machines_types[0] = $this->lang->line('not_selected');
+        foreach ($machines_types_array as $machine) {
+            $machines_types[$machine->id] = $machine->name;
+        }
+
+        $colors_array = $this->model_colors->get_list_of_colors();
+//            var_dump($colors_array);            die();
+        $colors[0] = $this->lang->line('not_selected');
+        foreach ($colors_array as $color) {
+            $colors[$color->id] = $color->color_name;
+        }
+        $data = array
+            (
+            'models' => $models,
+            'brands' => $brands,
+            'colors' => $colors,
+            'machines_types' => $machines_types
+        );
+        echo json_encode(array('data' => $data));
+    }
+
 }

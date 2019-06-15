@@ -21,6 +21,8 @@
                     echo "<error>";
                     echo validation_errors();
                     echo "</error>";
+                    if($customer_phone!='')
+                        echo lang('phone').": ".$customer_phone . '<br>';
                     echo form_textarea('message_text', $message, 'class = "form-control" style="width:65%; max-width: 65%; min-width: 65%" placeholder="' . lang('message') . '"');
                     ?>
 

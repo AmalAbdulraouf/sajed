@@ -4,7 +4,7 @@ class Model_contacts extends CI_Model {
 
     public function get_list_of_customers() {
         $this->db->select('DISTINCT(phone)');
-        $this->db->from('contacts')->group_by('phone');
+        $this->db->from('contacts')->where('length(phone)', 8)->group_by('phone');
         $query = $this->db->get()->result();
         foreach ($query as $phone) {
             $info = $this->db->select('first_name, last_name, email')

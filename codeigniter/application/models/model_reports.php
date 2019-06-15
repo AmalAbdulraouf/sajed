@@ -388,9 +388,10 @@ FROM
 
     public function get_delivered_report($start_date, $end_date, $sWhere, $sOrder, $sLimit) {
         $this->db->_protect_identifiers = false;
-        $this->db->select('orders.software,orders.electronic,orders.external_repair,orders.under_warranty,orders.id as order_id, orders.fault_description, actions.date ,orders.repair_cost,orders.spare_parts_cost,(orders.repair_cost+orders.spare_parts_cost) as total');
+        $this->db->select('concat(contacts.first_name," ", contacts.last_name) as contact_name,contacts.phone,orders.software,orders.electronic,orders.external_repair,orders.under_warranty,orders.id as order_id, orders.fault_description, actions.date ,orders.repair_cost,orders.spare_parts_cost,(orders.repair_cost+orders.spare_parts_cost) as total');
         $this->db->from('orders');
         $this->db->join('actions', 'actions.orders_id = orders.id');
+        $this->db->join('contacts', 'contacts.id = orders.customer_id');
         $this->db->where('orders.current_status_id', 6);
         $this->db->where('actions.categories_id', 5);
         if ($sWhere != "")
@@ -503,29 +504,110 @@ FROM
     }
 
     public function services_report($start_date, $end_date, $sWhere, $sOrder, $sLimit) {
+        $res = array();
         $this->db->_protect_identifiers = false;
-        $this->db->select(''
-                . 'count(orders.id) as total_orders, '
-                . 'orders.software,orders.electronic,orders.external_repair,sum(orders.repair_cost) as repair_cost, '
-                . 'sum(orders.spare_parts_cost) as spare_parts_cost, (orders.repair_cost+orders.spare_parts_cost) as total');
-        $this->db->from('orders');
-        $this->db->join('actions', 'actions.orders_id = orders.id');
-        $this->db->join('status', 'orders.current_status_id = status.id');
-        $this->db->where('actions.status_id', 6);
-
+        $res['electronic'] = $this->db->select(''
+                        . 'count(orders.id) as total_orders, '
+                        . 'sum(orders.repair_cost) as repair_cost, '
+                        . 'sum(orders.spare_parts_cost) as spare_parts_cost, (orders.repair_cost+orders.spare_parts_cost) as total')
+                ->from('orders')
+                ->join('actions', 'actions.orders_id = orders.id')
+                ->join('status', 'orders.current_status_id = status.id')
+                ->where('orders.electronic', 1)
+                ->where('actions.status_id', 6);
         if ($sWhere != "")
             $this->db->where($sWhere, '', false);
         else {
             $this->db->where('date(actions.date) >=', $start_date);
             $this->db->where('date(actions.date) <=', $end_date);
         }
-        $this->db->group_by('orders.software');
-        $this->db->group_by('orders.electronic');
-        $this->db->group_by('orders.external_repair');
-        $this->db->group_by('orders.under_warranty');
-        $this->db->order_by($sOrder . ' ' . $sLimit);
-        $result = $this->db->get();
-        return($result->result());
+
+        $res['electronic'] = $this->db->group_by('orders.electronic')
+                        ->get()->row();
+        $res['software'] = $this->db->select(''
+                        . 'count(orders.id) as total_orders, '
+                        . 'sum(orders.repair_cost) as repair_cost, '
+                        . 'sum(orders.spare_parts_cost) as spare_parts_cost, (orders.repair_cost+orders.spare_parts_cost) as total')
+                ->from('orders')
+                ->join('actions', 'actions.orders_id = orders.id')
+                ->join('status', 'orders.current_status_id = status.id')
+                ->where('orders.software', 1)
+                ->where('actions.status_id', 6);
+        if ($sWhere != "")
+            $this->db->where($sWhere, '', false);
+        else {
+            $this->db->where('date(actions.date) >=', $start_date);
+            $this->db->where('date(actions.date) <=', $end_date);
+        }
+
+        $res['software'] = $this->db->group_by('orders.software')
+                        ->get()->row();
+        $res['new_software'] = $this->db->select(''
+                        . 'count(orders.id) as total_orders, '
+                        . 'sum(orders.repair_cost) as repair_cost, '
+                        . 'sum(orders.spare_parts_cost) as spare_parts_cost, (orders.repair_cost+orders.spare_parts_cost) as total')
+                ->from('orders')
+                ->join('actions', 'actions.orders_id = orders.id')
+                ->join('status', 'orders.current_status_id = status.id')
+                ->where('orders.new_software', 1)
+                ->where('actions.status_id', 6);
+        if ($sWhere != "")
+            $this->db->where($sWhere, '', false);
+        else {
+            $this->db->where('date(actions.date) >=', $start_date);
+            $this->db->where('date(actions.date) <=', $end_date);
+        }
+
+        $res['new_software'] = $this->db->group_by('orders.new_software')
+                        ->get()->row();
+        $res['under_warranty'] = $this->db->select(''
+                        . 'count(orders.id) as total_orders, '
+                        . 'sum(orders.repair_cost) as repair_cost, '
+                        . 'sum(orders.spare_parts_cost) as spare_parts_cost, (orders.repair_cost+orders.spare_parts_cost) as total')
+                ->from('orders')
+                ->join('actions', 'actions.orders_id = orders.id')
+                ->join('status', 'orders.current_status_id = status.id')
+                ->where('orders.under_warranty', 1)
+                ->where('actions.status_id', 6);
+        if ($sWhere != "")
+            $this->db->where($sWhere, '', false);
+        else {
+            $this->db->where('date(actions.date) >=', $start_date);
+            $this->db->where('date(actions.date) <=', $end_date);
+        }
+
+        $res['under_warranty'] = $this->db->group_by('orders.under_warranty')
+                        ->get()->row();
+        $res['external_repair'] = $this->db->select(''
+                        . 'count(orders.id) as total_orders, '
+                        . 'sum(orders.repair_cost) as repair_cost, '
+                        . 'sum(orders.spare_parts_cost) as spare_parts_cost, (orders.repair_cost+orders.spare_parts_cost) as total')
+                ->from('orders')
+                ->join('actions', 'actions.orders_id = orders.id')
+                ->join('status', 'orders.current_status_id = status.id')
+                ->where('orders.external_repair', 1)
+                ->where('actions.status_id', 6);
+        if ($sWhere != "")
+            $this->db->where($sWhere, '', false);
+        else {
+            $this->db->where('date(actions.date) >=', $start_date);
+            $this->db->where('date(actions.date) <=', $end_date);
+        }
+
+        $res['external_repair'] = $this->db->group_by('orders.external_repair')
+                        ->get()->row();
+
+//        if ($sWhere != "")
+//            $res['electronic'] = $this->db->where($sWhere, '', false);
+//        else {
+//            $res['electronic'] = $this->db->where('date(actions.date) >=', $start_date)
+//                    ->where('date(actions.date) <=', $end_date);
+//        }
+//        $res['electronic'] = $this->db->group_by('orders.electronic')
+//                        ->order_by($sOrder . ' ' . $sLimit)
+//                        ->get()->row();
+
+        return($res);
     }
 
     public function warranty_sent_machines($start_date, $end_date, $sWhere, $sOrder, $sLimit) {

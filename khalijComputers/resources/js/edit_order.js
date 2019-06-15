@@ -255,12 +255,17 @@ $(".service, .service-selected").click(function () {
             } else if ($(this).attr("id") == "select_external") {
                 $('input[name=external]').val(0);
                 $('#visite_date').hide();
-            } else {
+            } else if ($(this).attr("id") == "select_warranty"){
                 $('input[name=warranty]').val(0);
                 $('#warranty_area').hide();
                 $('#billNumber').attr('disabled', false);
                 $('#billDate').attr('disabled', false);
                 $('#time_remaining').html("");
+            } else {
+                $('input[name=new_software]').val(0);
+                $('#new_software_area').hide();
+                $('#billNumber2').attr('disabled', false);
+                $('#billDate2').attr('disabled', false);
             }
             if (!$('#select_software').hasClass("service-selected") && !$('#select_electronic').hasClass("service-selected"))
                 $('#dates').hide();
@@ -285,11 +290,16 @@ $(".service, .service-selected").click(function () {
             $('#assign_tech').show();
             $('input[name=external]').val(1);
             $('#visite_date').show();
-        } else {
+        } else if ($(this).attr("id") == "select_warranty"){
             $('input[name=warranty]').val(1);
             $('#warranty_area').show();
             $('#billNumber').attr('disabled', false);
             $('#billDate').attr('disabled', false);
+        } else {
+            $('input[name=new_software]').val(1);
+            $('#new_software_area').show();
+            $('#billNumber2').attr('disabled', false);
+            $('#billDate2').attr('disabled', false);
         }
     }
 });
@@ -312,11 +322,16 @@ $(".service-selected").each(function () {
         $('#assign_tech').show();
         $('input[name=external]').val(1);
         $('#visite_date').show();
-    } else {
+    } else if ($(this).attr("id") == "select_warranty") {
         $('input[name=warranty]').val(1);
         $('#warranty_area').show();
         $('#billNumber').attr('disabled', false);
         $('#billDate').attr('disabled', false);
+    } else {
+        $('input[name=new_software]').val(1);
+        $('#new_software_area').show();
+        $('#billNumber2').attr('disabled', false);
+        $('#billDate2').attr('disabled', false);
     }
 });
 

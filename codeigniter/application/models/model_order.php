@@ -32,6 +32,12 @@ class Model_Order extends CI_Model {
         return($query->result());
     }
 
+    public function get_faults_list() {
+        $this->db->select('*');
+        $query = $this->db->get('faults');
+        return($query->result());
+    }
+
     public function save_new_order($user_name, $order_info, $contact_info, $company, $machine, $machines, $accessories_array) {
         $this->load->model('model_users');
         $query = $this->model_users->get_user_data_by_user_name($user_name);
@@ -167,7 +173,7 @@ class Model_Order extends CI_Model {
 		
 				) assignment_actions";
 
-        $this->db->select('orders.id, brands.name, models.model, contacts.first_name, contacts.last_name, orders.fault_description');
+        $this->db->select('orders.id, brands.name, models.model, contacts.first_name, contacts.last_name, orders.fault_description,new_software,software,electronic,external_repair');
         $this->db->from('orders');
         $this->db->join('machines', 'orders.machines_id = machines.id');
         $this->db->join('models', 'models.id = machines.models_id');
@@ -224,6 +230,7 @@ class Model_Order extends CI_Model {
     }
 
     public function search_orders_by_filters($customer_id, $date_from, $date_to, $delivered_or_not) {
+        $this->db->query('set sql_mode="";');
         $date_from = $this->prepareDateFrom($date_from);
         $date_to = $this->prepareDateTo($date_to);
         $this->db->select('orders.id, brands.name, models.model, contacts.first_name, contacts.last_name, orders.fault_description');
@@ -254,7 +261,7 @@ class Model_Order extends CI_Model {
     }
 
     public function get_order_info($order_id) {
-        $this->db->select('orders.state_after_repairing,orders.new_machine_serial_number,orders.out_of_warranty_reason,orders.back_date,orders.distructed,contacts.points as customer_points, orders.sent,warranty_sent.*,orders.warranty_period,orders.company,orders.visite_date, orders.visite_cost,
+        $this->db->select('orders.canceled,orders.state_after_repairing,orders.new_machine_serial_number,orders.out_of_warranty_reason,orders.back_date,orders.distructed,contacts.points as customer_points, orders.sent,warranty_sent.*,orders.warranty_period,orders.company,orders.visite_date, orders.visite_cost,
             orders.color_id,orders.software,orders.electronic,machines.image, machines.faults, 
             contacts.rate as contact_rate,orders.company,company.company_id, company.name as company_name,orders.id, brands.name as brand_name, models.model as model_name, 
 		contacts.first_name as contact_fname, contacts.last_name as contact_lname, orders.discount,
@@ -263,7 +270,7 @@ class Model_Order extends CI_Model {
 		machines.serial_number, orders.machines_id, actions.status_id, colors.color_name, machines_types.name as machine_type, orders.customer_id, orders.notes,
 		orders.external_repair, orders.Receipt, orders.receipt_name, orders.IDnum, orders.repair_cost, orders.spare_parts_cost,
 	    orders.customer_id, orders.machines_id, orders.billDate, orders.billNumber,
-            company.discount as company_discount, contacts.discount as contact_discount,receipt_employee.name as receipt_employee_name');
+            company.discount as company_discount, contacts.discount as contact_discount,receipt_employee.name as receipt_employee_name,new_software');
 
         $this->db->from('orders');
         $this->db->join('machines', 'orders.machines_id = machines.id', 'left');
@@ -949,6 +956,56 @@ class Model_Order extends CI_Model {
         return($query->result());
     }
 
+    public function search_order_by_filters($id, $name, $phone, $serial, $type, $brand, $model, $color) {
+        if (
+                $phone == '' &&
+                $name == '' &&
+                $serial == '' &&
+                $type == 0 &&
+                $brand == 0 &&
+                $model == 0 &&
+                $color == 0
+        )
+            return array();
+        $this->db->select('orders.id, brands.name, models.model, contacts.first_name, contacts.last_name, orders.fault_description, current_status_id, status.name as state');
+        $this->db->from('orders');
+        $this->db->join('machines', 'orders.machines_id = machines.id');
+        $this->db->join('models', 'models.id = machines.models_id');
+        $this->db->join('brands', 'brands.id = models.brands_id');
+        $this->db->join('contacts', 'contacts.id = orders.customer_id');
+        $this->db->join('status', 'orders.current_status_id = status.id');
+//        $this->db->join('actions', 'actions.orders_id = orders.id');
+//        $this->db->where('orders.id',"");
+        if ($phone != '') {
+//            $this->db->where('concat(5,contacts.phone)', $q);
+//            $this->db->where('concat(9665,contacts.phone)', $q);
+            $this->db->where('(concat(966,contacts.phone)="' . $q . ' or concat(9665,contacts.phone)="' . $q . ' or concat(5,contacts.phone)="' . $q . '")');
+        }
+        if ($name != '') {
+            $this->db->where('(contacts.first_name="' . $name . '" or contacts.last_name="' . $name . '" or concat(contacts.first_name,contacts.last_name)="' . $name . '")');
+//            $this->db->where('contacts.last_name', $name);
+//            $this->db->where('concat(contacts.first_name,contacts.last_name)', $name);
+        }
+        if ($serial != '') {
+            $this->db->where("machines.serial_number like '%" . $serial . "%'");
+        }
+        if ($type != 0) {
+            $this->db->where('machines.machines_types_id', $type);
+        }
+        if ($brand != 0) {
+            $this->db->where('machines.brands_id', $brand);
+        }
+        if ($model != 0) {
+            $this->db->where('machines.models_id', $model);
+        }
+        if ($color != 0) {
+            $this->db->where('machines.color_id', $color);
+        }
+
+        $query = $this->db->get();
+        return($query->result());
+    }
+
     public function save_call_action($order_id, $agreed, $date) {
         $this->load->model('model_users');
         $assigner = $this->model_users->get_user_data_by_user_name($this->session->userdata('user_name'));
@@ -1092,6 +1149,29 @@ class Model_Order extends CI_Model {
                                 . 'agent_name = "" or '
                                 . 'receipt_employee_id = "")')
                         ->get()->row();
+    }
+
+    public function cancel($order_id,$reason,$user_name) {
+        $this->load->model('model_users');
+        $user = $this->model_users->get_user_data_by_user_name($user_name);
+        $user_id = $user[0]->id;
+        date_default_timezone_set('Asia/Riyadh');
+        $my_date = date("Y-m-d H:i:s", time());
+        $data = array
+            (
+            'orders_id' => $order_id,
+            'users_id' => $user_id,
+            'description' => lang('cancel_order').": ".$reason,
+            'repair_cost' => 0,
+            'spare_parts_cost' => 0,
+            'date' => $my_date,
+            'categories_id' => 4,
+            'status_id' => 4,
+        );
+        //echo "amal";
+        $this->db->insert('actions', $data);
+        $this->db->where('id', $order_id)
+                ->update('orders', array('canceled' => 1, 'current_status_id' => 4));
     }
 
 }

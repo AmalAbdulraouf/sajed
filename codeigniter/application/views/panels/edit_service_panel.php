@@ -13,6 +13,17 @@
                 <img id="select_software" data-toggle="tooltip" title="software برامج" height="50px" width="50px" class="<?php echo $class ?>" src="<?php echo base_url() ?>/resources/images/software.png"/>
                 <input name="software" type="hidden" value="0"/>
             </div>
+            
+            <div class="col-md-1">
+                <?php
+                $class = "service";
+                if ($order_info['order_basic_info'][0]->new_software == 1)
+                    $class = "service-selected";
+                ?>
+                <img id="select_new_software" data-toggle="tooltip" title="new device software برمجة جهاز جديد" height="50px" width="50px" class="<?php echo $class ?>" src="<?php echo base_url() ?>/resources/images/sw_pack.png"/>
+                <input name="new_software" type="hidden" value="0"/>
+            </div>
+            
             <div class="col-md-1">
                 <?php
                 $class = "service";
@@ -89,6 +100,42 @@
                         <div class="col-md-3">
                             <?php echo lang('time_remaining') ?>
                             <p id="time_remaining"></p>
+                        </div>
+                    </div>
+                </div>
+                <div id="new_software_area" style="border: none;display: none" class="form-group form-inline ">
+                    <div class="row">
+                        <br>
+                        <div class="col-md-3">
+                            <?php
+                            echo lang('billDate');
+                            $billDate = array
+                                (
+                                'name' => 'billDate2',
+                                'id' => 'billDate2',
+                                'type' => 'text',
+                                'class' => 'form-control input-md-3 datepicker',
+                                'placeholder' => lang('billDate'),
+                                'style' => 'width: 70%',
+                                'value' => $order_info['order_basic_info'][0]->billDate
+                            );
+                            echo form_input($billDate);
+                            ?>
+                        </div>
+                        <div class="col-md-3 ">
+                            <?php
+                            echo lang('billNumber');
+                            $bill_num = array
+                                (
+                                'name' => 'billNumber2',
+                                'id' => 'billNumber2',
+                                'class' => 'form-control input-md-3 numeric_input',
+                                'placeholder' => lang('billNumber'),
+                                'style' => 'width: 70%',
+                                'value' => $order_info['order_basic_info'][0]->billNumber
+                            );
+                            echo form_input($bill_num);
+                            ?>
                         </div>
                     </div>
                 </div>
@@ -173,7 +220,16 @@
                         <?php
                         echo lang('assign_to');
                         $opt = 'class="technician"';
-                        echo form_dropdown('technician', $technicians, $order_technician, 'style="width: auto" class="form-control input-md" ');
+                        echo '<select style="width: auto" class="form-control  input-md">';
+                        foreach ($technicians_array as $tech) {
+                            if (($tech->software && $order_info['order_basic_info'][0]->software) ||
+                                    ($tech->electronic && $order_info['order_basic_info'][0]->electronic) ||
+                                    ($tech->external_repair && $order_info['order_basic_info'][0]->external) || 
+                                    ($tech->software && $order_info['order_basic_info'][0]->new_software))
+                                echo '<option ' . ($order_technician == $tech->user_name ? 'selected' : '') . ' value="' . $tech->id . '">' . $tech->user_name . '</option>';
+                        }
+                        echo '</select>';
+//                        echo form_dropdown('technician', $technicians, $order_technician, 'style="width: auto" class="form-control input-md" ');
                         ?>
                     </div>
                     <div id="visite_date" style="border: none;display: none" class="form-group form-inline">

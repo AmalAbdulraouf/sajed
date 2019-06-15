@@ -93,7 +93,7 @@ class Users_Manager extends CI_Controller {
 
         return '<input type="text"  maxlength="50" value="" name="password" style="width:100%" autocomplete="false">';
     }
-    
+
     function encrypt_password_callback($post_array, $primary_key) {
 
         if (!empty($post_array['password'])) {
@@ -104,7 +104,7 @@ class Users_Manager extends CI_Controller {
 
         return $post_array;
     }
-    
+
     public function delete_user_callback($primary_key) {
         return site_url('/users_manager/deactivate_user/' . $primary_key);
     }
@@ -216,7 +216,7 @@ class Users_Manager extends CI_Controller {
                 'email' => $this->input->post('email'),
                 'address' => $this->input->post('address'),
                 'password' => md5($this->input->post('password')),
-                'warranty_follower' => $this->input->post('warranty_follower')?true:false,
+                'warranty_follower' => $this->input->post('warranty_follower') ? true : false,
                 'first_name' => $this->input->post('first_name'),
                 'last_name' => $this->input->post('last_name'),
                 'email' => $this->input->post('email'),
@@ -265,9 +265,9 @@ class Users_Manager extends CI_Controller {
             $list_groups = $this->model_groups->get_list_of_defined_groups();
 
             $posted_password = $this->input->post('password');
-            if (!empty($posted_password)) {
+            if ($posted_password!='') {
                 $this->form_validation->set_rules('password', 'Password', 'required|md5|trim');
-                $this->form_validation->set_rules('passwordConfirmation', 'Confirm Password', 'required|md5|trim|callback_passwords_match');
+//                $this->form_validation->set_rules('passwordConfirmation', 'Confirm Password', 'required|md5|trim|callback_passwords_match');
                 $password = md5($posted_password);
             } else {
                 $password = '';
@@ -282,12 +282,15 @@ class Users_Manager extends CI_Controller {
                 'address' => $this->input->post('address')
             );
             $user_name = $this->input->post('user_name');
-            $warranty_follower = $this->input->post('warranty_follower')?true:false;
+            $warranty_follower = $this->input->post('warranty_follower') ? true : false;
+            $software = $this->input->post('software') ? true : false;
+            $electronic = $this->input->post('electronic') ? true : false;
+            $external = $this->input->post('external_repair') ? true : false;
             $user_groups = $this->input->post('user_groups');
 
             $this->load->model('model_users');
             if ($this->form_validation->run()) {
-                $this->model_users->update_user($user_name, $password, $warranty_follower, $contact_info, $user_groups);
+                $this->model_users->update_user($user_name, $password, $warranty_follower, $contact_info, $user_groups,$software,$electronic,$external);
                 $this->load_users_page("Changes Successfully Performed");
             } else {
                 $this->load_users_page(validation_errors());
@@ -340,11 +343,11 @@ class Users_Manager extends CI_Controller {
                         $technicians[$tech->id] = $tech->user_name;
                 }
 
-
                 $data = array
                     (
                     'orders' => $orders,
                     'technicians' => $technicians,
+                    'technicians_array'=>$technicians_array,
                     'tech_id' => $tech_id,
                     'status' => $status,
                 );

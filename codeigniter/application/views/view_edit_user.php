@@ -6,8 +6,7 @@
         //Suppose u want 4 number of character
         if (fieldLength <= 9) {
             return true;
-        }
-        else
+        } else
         {
             var str = document.getElementById('phone').value;
             str = str.substring(0, str.length - 1);
@@ -17,17 +16,17 @@
 </script>
 
 <script>
-    $(document).ready(function()
+    $(document).ready(function ()
     {
-        $('#presence').click(function() {
+        $('#presence').click(function () {
             var b_url = "<?php echo base_url(); ?>";
             var i = <?php echo $user_info->id; ?>;
 
             $.ajax({
                 url: b_url + "index.php/users_manager/Absence/" + i + "/0",
-                error: function() {
+                error: function () {
                 },
-                success: function() {
+                success: function () {
                     $('#presence').hide();
                     $('#absence').show();
                 }
@@ -119,8 +118,13 @@ $address_textarea = array(
 );
 echo form_textarea($address_textarea);
 echo "</td></tr>";
-$checked = $user_info->warranty_follower == 1?" checked":"";
-echo "<tr><td colspan='2'><input type='checkbox' name='warranty_follower' ".$checked.">" . lang('warranty_follower') . "</input></td></tr>";
+$checked = $user_info->warranty_follower == 1 ? " checked" : "";
+echo "<tr><td colspan='2'><hr>"
+ . "<input type='checkbox' name='warranty_follower' " . ($user_info->warranty_follower == 1 ? " checked" : "") . ">" . lang('warranty_follower') . "</input><br>"
+ . "<input type='checkbox' name='software' " . ($user_info->software == 1 ? " checked" : "") . ">software برامج</input><br>"
+ . "<input type='checkbox' name='electronic' " . ($user_info->electronic == 1 ? " checked" : "") . ">electronic الكترونيات</input><br>"
+ . "<input type='checkbox' name='external_repair' " . ($user_info->external_repair == 1 ? " checked" : "") . ">external صيانة خارجية</input>"
+ . "</td></tr>";
 
 echo '<tr><td colspan=2><h3>' . lang('groups') . '</h3></td></tr>';
 foreach ($list_groups as $group) {
@@ -161,10 +165,10 @@ echo form_close();
 
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var msg = <?php echo json_encode(lang("confirm_deactivate_msg")); ?>;
 
-        $('#Deletion').click(function() {
+        $('#Deletion').click(function () {
             var conf = confirm(msg);
             if (conf == true)
             {
@@ -191,8 +195,7 @@ function is_user_in_group($group_id, $user_groups) {
         if (cb.checked) {
             document.getElementById('password_row').style.display = "";
             document.getElementById('confirm_password_row').style.display = "";
-        }
-        else {
+        } else {
             document.getElementById('password_row').style.display = "none";
             document.getElementById('confirm_password_row').style.display = "none";
         }

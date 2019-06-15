@@ -35,7 +35,7 @@ $lang['please_assign_to_tech'] = "Please assign the order to a technician";
 $lang['not found'] = "Order has not been found";
 $lang['order_tech'] = "Order Technician ";
 $lang['customers'] = "customers";
-
+$lang['cancel_order'] = "Cancel order";
 
 // view_login.php
 $lang['user_name'] = "User Name";
@@ -83,6 +83,9 @@ $lang['expected_date'] = "Expected Date ";
 $lang['examine_date'] = "examine expected date";
 $lang['delivery_date'] = "delivery expected date";
 $lang['day'] = "day";
+$lang['month'] = "month";
+$lang['week'] = "week";
+$lang['year'] = "year";
 $lang['work_day'] = "day of work";
 $lang['during'] = "during";
 $lang['notes'] = "Notes";
@@ -284,6 +287,7 @@ $lang['customer called'] = "a call to the customer";
 $lang['places'] = "Store places";
 $lang["reasons"] = "Technicians Excuses";
 $lang['other'] = "Others";
+$lang['replace_image'] = 'Replaced parts image';
 $lang['search_by_phone'] = "Search by phone";
 $lang['delivered_orders'] = "Delivered machines report";
 $lang['orders'] = "All orders";
@@ -326,3 +330,6 @@ $lang['recipient'] = "recipient name";
 $lang['receipt_required'] = "receipt_required";
 $lang['no_answer'] = "no_answer";
 $lang['cancel_reason'] = "cancel_reason";
+$lang['cancel_order_reason'] = "Cancel reason";
+$lang['enter_reason'] = "please enter the reason";
+$lang['electronic_tech'] = "Electronic technician";

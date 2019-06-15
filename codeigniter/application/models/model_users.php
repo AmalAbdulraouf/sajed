@@ -95,7 +95,7 @@ class Model_users extends CI_Model {
     }
 
     public function get_user_data_by_user_name($user_name) {
-        $this->db->select('warranty_follower, users.id, users.user_name, users.contact_id as contacts_id, users.Absent, contacts.first_name, contacts.last_name, contacts.phone, contacts.address, contacts.email');
+        $this->db->select('warranty_follower, users.id, users.user_name, software,electronic,external_repair,users.contact_id as contacts_id, users.Absent, contacts.first_name, contacts.last_name, contacts.phone, contacts.address, contacts.email');
         $this->db->from('users');
         $this->db->join('contacts', 'users.contact_id = contacts.id');
         $this->db->where('users.user_name', $user_name);
@@ -166,7 +166,7 @@ class Model_users extends CI_Model {
         return($this->db->update_id());
     }
 
-    public function update_user($user_name, $password, $warranty_follower, $contact_info, $user_groups) {
+    public function update_user($user_name, $password, $warranty_follower, $contact_info, $user_groups,$software,$electronic,$external) {
         $this->db->select('id, contact_id as contacts_id');
         $this->db->where('user_name', $user_name);
         $query = $this->db->get('users');
@@ -187,6 +187,9 @@ class Model_users extends CI_Model {
         $user_pass = array
             (
             'warranty_follower' => $warranty_follower,
+            'electronic' => $electronic,
+            'software' => $software,
+            'external_repair' => $external,
         );
         if ($password != '') {
             $user_pass['password'] = $password;
@@ -206,9 +209,11 @@ class Model_users extends CI_Model {
         }
     }
 
-    public function get_list_of_users_has_permissions($permission_name) {
-        $this->db->select('users.user_name, users.id');
+    public function get_list_of_users_has_permissions($permission_name, $conditions = null) {
+//        $this->db->query('set sql_mode = "";');
+        $this->db->select('users.user_name, users.id,electronic,software,external_repair');
         $this->db->from('users');
+        $this->db->distinct();
         $this->db->where('users.Activated', 1);
         $this->db->where('users.Absent', 0);
         $this->db->join('users_has_groups', 'users.id = users_has_groups.users_id');

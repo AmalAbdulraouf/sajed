@@ -55,6 +55,13 @@
                     <div class="col-md-4">
                         <?php {
                             echo '<button class="report_menu_item" type="button" 
+                            onClick="location.href=\'' . base_url() . 'index.php/management/faults_management\'">' . lang('faults') . '</button><br>';
+                        }
+                        ?>
+                    </div>
+                    <div class="col-md-4">
+                        <?php {
+                            echo '<button class="report_menu_item" type="button" 
                             onClick="location.href=\'' . base_url() . 'index.php/management/receipt_employee_management\'">' . lang('receipt_employee') . '</button><br>';
                         }
                         ?>

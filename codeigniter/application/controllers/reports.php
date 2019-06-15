@@ -29,7 +29,7 @@ class reports extends CI_Controller {
                 'name' => 'reports/view_main_reports_page',
                 'data' => null
             );
-           // $this->load->view('new/pages/template/template', $array);
+            // $this->load->view('new/pages/template/template', $array);
 
             $this->load->view('view_template', $array);
         } else {
@@ -300,6 +300,8 @@ class reports extends CI_Controller {
                     $services[] = "external";
                 if ($aRow->under_warranty != 0)
                     $services[] = "warranty";
+                if ($aRow->new_software != 0)
+                    $services[] = "برمجة جهاز جديد";
                 $row = array();
                 $row[] = $aRow->order_id;
                 $row[] = implode(", ", $services);
@@ -431,18 +433,22 @@ class reports extends CI_Controller {
             $bills = $this->model_reports->services_report($start_date, $end_date, $sWhere, $sOrder, $sLimit);
             $output = array("aaData" => array()
             );
-            foreach ($bills as $aRow) {
-                $services = array();
-                if ($aRow->software != 0)
-                    $services[] = "software";
-                if ($aRow->electronic != 0)
-                    $services[] = "electronic";
-                if ($aRow->external_repair != 0)
-                    $services[] = "external";
-                if ($aRow->under_warranty != 0)
-                    $services[] = "warranty";
+//            var_dump($bills);
+            foreach ($bills as $key => $aRow) {
+//                var_dump($aRow);
+//                $services = array();
+//                if ($aRow->software != 0)
+//                    $services[] = "software";
+//                if ($aRow->electronic != 0)
+//                    $services[] = "electronic";
+//                if ($aRow->external_repair != 0)
+//                    $services[] = "external";
+//                if ($aRow->under_warranty != 0)
+//                    $services[] = "warranty";
+//                if ($aRow->new_software != 0)
+//                    $services[] = "برمجة جهاز جديد";
                 $row = array();
-                $row[] = implode(", ", $services);
+                $row[] = $key;
                 $row[] = $aRow->total_orders;
                 $row[] = $aRow->repair_cost;
                 $row[] = $aRow->spare_parts_cost;
@@ -513,13 +519,35 @@ class reports extends CI_Controller {
                     $services[] = "external";
                 if ($aRow->under_warranty != 0)
                     $services[] = "warranty";
+                if ($aRow->new_software != 0)
+                    $services[] = "برمجة جهاز جديد";
+                $date1 = time();
+                $date2 = strtotime("+" . $aRow->date . " day");
+
+                $diff = abs($date2 - $date1);
+
+                $years = floor($diff / (365 * 60 * 60 * 24));
+                $months = floor(($diff - $years * 365 * 60 * 60 * 24) / (30 * 60 * 60 * 24));
+                $days = floor(($diff - $years * 365 * 60 * 60 * 24 - $months * 30 * 60 * 60 * 24) / (60 * 60 * 24));
+
+                $weeks = (int) ($days / 7);
+                $days = $days % 7;
+                $days_str = "";
+                if ($years > 0)
+                    $days_str .= $years . " " . $this->lang->line('year') . " <br>";
+                if ($months > 0)
+                    $days_str .= $months . " " . $this->lang->line('month') . " <br>";
+                if ($weeks)
+                    $days_str .= $weeks . " " . $this->lang->line('week') . " <br>";
+                if ($days > 0)
+                    $days_str .= $days . " " . $this->lang->line('day') . " <br>";
                 $row = array();
                 $row[] = $aRow->order_id;
                 $row[] = implode(", ", $services);
                 $row[] = $aRow->contact_name;
                 $row[] = $aRow->phone;
                 $row[] = $aRow->total;
-                $row[] = $aRow->date . " " . $this->lang->line('day');
+                $row[] = $days_str;
                 $row[] = $aRow->place;
                 $output['aaData'][] = $row;
             }
@@ -579,7 +607,8 @@ class reports extends CI_Controller {
                     $services[] = "external";
                 if ($aRow->under_warranty != 0)
                     $services[] = "warranty";
-
+                if ($aRow->new_software != 0)
+                    $services[] = "برمجة جهاز جديد";
                 $row = array();
                 $row[] = $aRow->order_id;
                 $row[] = implode(", ", $services);
@@ -647,7 +676,8 @@ class reports extends CI_Controller {
                     $services[] = "external";
                 if ($aRow->under_warranty != 0)
                     $services[] = "warranty";
-
+                if ($aRow->new_software != 0)
+                    $services[] = "برمجة جهاز جديد";
                 $row = array();
                 $row[] = $aRow->order_id;
                 $row[] = implode(", ", $services);
@@ -715,6 +745,8 @@ class reports extends CI_Controller {
                     $services[] = "external";
                 if ($aRow->under_warranty != 0)
                     $services[] = "warranty";
+                if ($aRow->new_software != 0)
+                    $services[] = "برمجة جهاز جديد";
                 $row = array();
                 $row[] = $aRow->order_id;
                 $row[] = implode(", ", $services);

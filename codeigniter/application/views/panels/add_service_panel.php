@@ -9,6 +9,10 @@
                 <input name="software" type="hidden" value="0"/>
             </div>
             <div class="col-md-1">
+                <img id="select_new_software" data-toggle="tooltip" title="new device software برمجة جهاز جديد" height="50px" width="50px" class="service" src="<?php echo base_url() ?>/resources/images/sw_pack.png"/>
+                <input name="new_software" type="hidden" value="0"/>
+            </div>
+            <div class="col-md-1">
                 <img id="select_electronic" data-toggle="tooltip" title="electronic الكترونيات"  height="50px" width="50px" class="service" src="<?php echo base_url() ?>/resources/images/electronic.png"/>
                 <input name="electronic" type="hidden" value="0"/>
             </div>
@@ -60,16 +64,53 @@
                             echo form_input($bill_num);
                             ?>
                         </div>
-                        <div class="col-md-3 ">
+                        <div class="col-md-3 rest_warranty">
                             <?php
                             echo lang('warranty_period');
                             echo form_dropdown('warranty_period', array("1" => lang("year"), "2" => lang("two_years")), set_value('warranty_period'), 'style="width: auto" class="form-control input-md"');
                             ?>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 rest_warranty">
                             <?php echo lang('time_remaining') ?>
                             <p id="time_remaining"></p>
                         </div>
+                    </div>
+                </div>
+                <div id="new_software_area" style="border: none;display: none" class="form-group form-inline ">
+                    <div class="row">
+                        <br>
+                        <div class="col-md-3">
+                            <?php
+                            echo lang('billDate');
+                            $billDate = array
+                                (
+                                'name' => 'billDate2',
+                                'id' => 'billDate2',
+                                'type' => 'text',
+                                'class' => 'form-control input-md-3 datepicker',
+                                'placeholder' => lang('billDate'),
+                                'style' => 'width: 70%',
+                                'value' => set_value('billDate')
+                            );
+                            echo form_input($billDate);
+                            ?>
+                        </div>
+                        <div class="col-md-3 ">
+                            <?php
+                            echo lang('billNumber');
+                            $bill_num = array
+                                (
+                                'name' => 'billNumber2',
+                                'id' => 'billNumber2',
+                                'class' => 'form-control input-md-3 numeric_input',
+                                'placeholder' => lang('billNumber'),
+                                'style' => 'width: 70%',
+                                'value' => set_value('billNumber')
+                            );
+                            echo form_input($bill_num);
+                            ?>
+                        </div>
+                      
                     </div>
                 </div>
                 <div class="row">
@@ -155,6 +196,13 @@
                         echo form_dropdown('technician', $technicians, set_value('technician'), 'style="width: auto" class="form-control input-md" ');
                         ?>
                     </div>
+                    <div id="assign_tech_electronic" style="display: none">
+                        <?php
+                        echo lang('electronic_tech');
+                        $opt = 'class="technician"';
+                        echo form_dropdown('technician', $technicians, set_value('technician'), 'style="width: auto" class="form-control input-md" ');
+                        ?>
+                    </div>
                     <div id="visite_date" style="border: none;display: none" class="form-group form-inline">
                         <?php
                         echo lang('visite_date');
@@ -208,6 +256,8 @@
                 </div>
                 <div class="col-md-9">
                     <?php
+                    echo form_dropdown('fault', $faults, set_value('fault'), 'class="form-control input-md-3" style="width:70%" required');
+
                     $fault_description_textarea = array(
                         'name' => 'fault_description',
                         'rows' => "6",
@@ -216,7 +266,7 @@
                         'data-index' => "$counter",
                         'class' => 'form-control',
                         'required' => '',
-                        'style' => 'width: 70%; min-width: 45%; max-width: 70%'
+                        'style' => 'width: 70%; min-width: 45%; max-width: 70%;'
                     );
                     echo form_textarea($fault_description_textarea);
                     $counter++;
@@ -278,3 +328,16 @@
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    $('[name=fault]').change(function () {
+        if ($('[name=fault]').val() == 0) {
+            $('[name=fault_description]').show();
+            $('[name=fault_description]').val('');
+            $('[name=fault_description]').text('');
+        } else {
+            $('[name=fault_description]').hide();
+            $('[name=fault_description]').val($('[name=fault]').find('option:selected').text());
+            $('[name=fault_description]').text($('[name=fault]').find('option:selected').text());
+        }
+    });
+</script>
